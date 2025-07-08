@@ -1,71 +1,43 @@
 'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
-export default {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('users', {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
-      },
-      username: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        unique: true
-      },
-      password: {
-        type: Sequelize.STRING(255),
-        allowNull: false
-      },
-      email: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-        unique: true,
-        validate: {
-          isEmail: true
-        }
-      },
-      full_name: {
-        type: Sequelize.STRING(100),
-        allowNull: false
-      },
-      gender: {
-        type: Sequelize.ENUM('male', 'female', 'other'),
-        allowNull: false,
-        defaultValue: 'other'
-      },
-      role: {
-        type: Sequelize.ENUM('admin', 'user'),
-        allowNull: false,
-        defaultValue: 'user'
-      },
-      created_at: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-      },
-      updated_at: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
-      }
-    });
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize');
+const process = require('process');
+const basename = path.basename(__filename);
+const env = process.env.NODE_ENV || 'development';
+const config = require(__dirname + '/../config/config.json')[env];
+const db = {};
 
-    // Add indexes for better performance
-    await queryInterface.addIndex('users', ['username']);
-    await queryInterface.addIndex('users', ['email']);
-    await queryInterface.addIndex('users', ['role']);
-  },
+let sequelize;
+if (config.use_env_variable) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
 
-  async down(queryInterface, Sequelize) {
-    // Remove indexes first
-    await queryInterface.removeIndex('users', ['username']);
-    await queryInterface.removeIndex('users', ['email']);
-    await queryInterface.removeIndex('users', ['role']);
-    
-    // Then drop the table
-    await queryInterface.dropTable('users');
+fs
+  .readdirSync(__dirname)
+  .filter(file => {
+    return (
+      file.indexOf('.') !== 0 &&
+      file !== basename &&
+      file.slice(-3) === '.js' &&
+      file.indexOf('.test.js') === -1
+    );
+  })
+  .forEach(file => {
+    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    db[model.name] = model;
+  });
+
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
   }
-};
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
