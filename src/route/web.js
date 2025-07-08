@@ -12,7 +12,7 @@ const initWebRoutes = (app)=>{
     router.get('/users', (req,res)=>{
         return  res.json({status:true, masssage:"Đây là trang List users",})
     })
-    router.get('/user/1', (req,res)=>{
+    router.get('/users/1', (req,res)=>{
         return  res.json({status:true, masssage:"Đây là trang user1",})
     })
     return app.use("/",router)
