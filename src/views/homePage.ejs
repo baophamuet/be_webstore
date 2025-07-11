@@ -7,7 +7,15 @@
 <body>
     <h1>Hello world from foler views</h1>
     <p>
-        <%=data %>
+         <% if (data) { %>
+    <ul>
+      <% for (const key in data) { %>
+        <li><strong><%= key %>:</strong> <%= data[key] %></li>
+      <% } %>
+    </ul>
+  <% } else { %>
+    <p>Không có dữ liệu đơn hàng</p>
+  <% } %>
     </p>
 </body>
 </html>

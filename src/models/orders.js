@@ -21,6 +21,7 @@ export default (sequelize, DataTypes) => {
     sequelize,
     timestamps: false,
     modelName: 'orders',
+     tableName: 'orders' 
   });
   return orders;
 };

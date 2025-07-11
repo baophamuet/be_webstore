@@ -13,10 +13,17 @@ const initWebRoutes = (app)=>{
     router.get('/users/1', (req,res)=>{
         return  res.json({status:true, masssage:"Đây là trang user1",})
     })
-    router.post(`/users/`, (req,res) =>{
-        let {user} = req.body
-         return  res.json({status:true, masssage:`Bạn vừa yêu cầu post user có id bằng ${id=id+1} `, masssage2: user})
-    })
+
+    router.get('/orders',  homeController.getOrder)
+    // router.post(`/users/`, (req,res) =>{
+    //     let {user} = req.body
+    //      return  res.json({status:true, masssage:`Bạn vừa yêu cầu post user có id bằng ${id=id+1} `, masssage2: user})
+    // })
+
+    router.post(`/user`, homeController.postUser)
+    router.post(`/deluser`, homeController.delUser)
+
+    
 
 
     return app.use("/",router)
