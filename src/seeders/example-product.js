@@ -5,6 +5,7 @@ export default {
     await queryInterface.bulkInsert('products', [
       {
         name: 'iPhone 15 Pro Max',
+        category_id: 4,
         description: 'Flagship Apple smartphone',
         price: '1299',
         stock: 50,
@@ -13,6 +14,7 @@ export default {
       },
       {
         name: 'Samsung Galaxy S24 Ultra',
+        category_id: 4,
         description: 'High-end Android smartphone',
         price: '1199',
         stock: 30,
@@ -21,6 +23,7 @@ export default {
       },
       {
         name: 'Xiaomi 14 Ultra',
+        category_id: 4,
         description: 'Affordable flagship with strong camera',
         price: '899',
         stock: 100,
@@ -29,6 +32,7 @@ export default {
       },
       {
         name: 'Google Pixel 8 Pro',
+        category_id: 4,
         description: 'Clean Android experience with AI camera',
         price: '1099',
         stock: 40,
@@ -37,6 +41,7 @@ export default {
       },
       {
         name: 'OnePlus 12',
+        category_id: 4,
         description: 'Smooth performance, fast charging',
         price: '799',
         stock: 70,
@@ -45,6 +50,7 @@ export default {
       },
       {
         name: 'Sony Xperia 1 V',
+        category_id: 4,
         description: 'Pro-grade camera and display',
         price: '1290',
         stock: 25,
@@ -53,6 +59,7 @@ export default {
       },
       {
         name: 'Asus ROG Phone 7',
+        category_id: 4,
         description: 'Gaming smartphone with powerful specs',
         price: '1099',
         stock: 60,

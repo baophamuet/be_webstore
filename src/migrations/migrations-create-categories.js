@@ -1,31 +1,24 @@
 'use strict';
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('products', {
+    await queryInterface.createTable('categories', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-    //       name: DataTypes.STRING,
-    // description: DataTypes.TEXT,
-    // price: DataTypes.STRING,
-    // stock: DataTypes.INTEGER,
+    // codename: DataTypes.STRING,
+    // description: DataTypes.STRING,
+    // parent_id: DataTypes.INTEGER,
     // created_at: DataTypes.DATE
-      name: {
+      codename: {
         type: Sequelize.STRING
-      },
-      category_id: {
-        type: Sequelize.INTEGER
       },
       description: {
-        type: Sequelize.TEXT
-      },
-      price: {
         type: Sequelize.STRING
       },
-      stock: {
+      parent_id: {
         type: Sequelize.INTEGER
       },
       created_at: {
@@ -42,6 +35,6 @@ export default {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('products');
+    await queryInterface.dropTable('categories');
   }
 };

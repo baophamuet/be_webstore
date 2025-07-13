@@ -2,7 +2,7 @@
 import { Model } from 'sequelize';
 
 export default (sequelize, DataTypes) => {
-  class products extends Model {
+  class categories extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -12,17 +12,15 @@ export default (sequelize, DataTypes) => {
       // define association here
     }
   }
-  products.init({
-    name: DataTypes.STRING,
-    category_id:DataTypes.INTEGER,
-    description: DataTypes.TEXT,
-    price: DataTypes.STRING,
-    stock: DataTypes.INTEGER,
+  categories.init({
+    codename: DataTypes.STRING,
+    description: DataTypes.STRING,
+    parent_id: DataTypes.INTEGER,
     created_at: DataTypes.DATE
   }, {
     sequelize,
     timestamps: false,
-    modelName: 'products',
+    modelName: 'categories',
   });
-  return products;
+  return categories;
 };

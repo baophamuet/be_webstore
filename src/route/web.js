@@ -21,7 +21,7 @@ const initWebRoutes = (app)=>{
     // })
 
     router.post(`/user`, homeController.postUser)
-    router.post(`/deluser`, homeController.delUser)
+    router.delete(`/deluser`, homeController.delUser)
 
     
 

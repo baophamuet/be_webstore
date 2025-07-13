@@ -1,6 +1,7 @@
 import express from 'express'
 import db from '../models/index.js'
 import CRUDService from "../services/CRUDService.js"
+import { raw } from 'mysql2';
 
 let getHomePage = async (req,res) =>{
     try {
@@ -15,25 +16,24 @@ let getHomePage = async (req,res) =>{
 
 }
 let getOrder = async (req,res) =>{
-    try {
-        const [order, orderItem] = await Promise.all([
-  db.orders.findAll(),
-  db.orderItems.findAll()
-]);
-
-        console.log('>>>>>>>>>>>>>> check data:   ',order[0].dataValues)
-
+    return new Promise(async (resolve,reject) =>{
+          try {
+            let order =await db.orders.findAll({raw:true,})
+  //db.orderItems.findAll()
+            console.log('>>>>>>>>>>>>>> check data:   ',order)
+            resolve(order)
         return  res.render(
-            'homePage.ejs',
-            
-            {data:order[0].dataValues}
+            'detailOrder.ejs',
+            {data:order}
         )
     } catch (e) {
         console.log(e)
     }
+    })
 }
 
 let getUser = (req,res) =>{
+   // await CRUDService.readUser(req)
     return  res.json({status:true, masssage:"Đây là trang Users nhé!!!", boss:"bao.phamthe đz 10 điểm ạ",})
 
 }

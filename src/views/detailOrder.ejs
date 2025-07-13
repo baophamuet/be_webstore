@@ -1,0 +1,31 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảo đz 10 điểm</title>
+</head>
+<body>
+    <h1>Hello world from folder view</h1>
+    <p>
+         <% if (data) { %>
+    <ul>
+  <% for (const key in data) { %>
+    <% if (typeof data[key] === 'object') { %>
+      <li><strong><%= Number(key)+1 %>:</strong></li>
+      <ul>
+        <% for (const subKey in data[key]) { %>
+          <li><%= subKey %>: <%= data[key][subKey] %></li>
+        <% } %>
+      </ul>
+    <% } else { %>
+      <li><strong><%= key %>:</strong> <%= data[key] %></li>
+    <% } %>
+  <% } %>
+</ul>
+
+  <% } else { %>
+    <p>Không có dữ liệu đơn hàng</p>
+  <% } %>
+    </p>
+</body>
+</html>
