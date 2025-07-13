@@ -1,3 +1,5 @@
+import { raw } from 'mysql2'
+import { Op } from 'sequelize';
 import db from '../models/index.js'
 import bcrypt from 'bcryptjs'
 
@@ -9,6 +11,13 @@ let displapOrder = () => {
 }
 
 let createUser = async(user) => {
+    let checkuser = await db.Users.findOne(
+        {
+            where:{username: user.username,},
+            raw: true
+        });
+    console.log(">>>>> tạo ",checkuser)
+    if (checkuser) return false
     return new Promise (async(resolve,reject)=>{
         try {
                let hashUserPasswordFromBcrypt = await hashUserPassword(user.password)
@@ -25,7 +34,7 @@ let createUser = async(user) => {
     
                // console.log(user)
                 console.log(hashUserPasswordFromBcrypt)
-                resolve("Ok Create User")
+                resolve(true)
         }catch(e){
                 reject(e)
         }
@@ -38,18 +47,21 @@ console.log("xóa username này :    ", user.username)
         try {
                 // let test= hashUserPassword(user.pass)
                let deletedCount =  await db.Users.destroy({
-                    where:{
-                        username: user.username,
-                        email: user.email
+                    where: {
+                        [Op.or]: [
+                            { username: user.username },
+                            { email: user.email }
+                        ]
                     }
-
                 })
                 if (deletedCount > 0) {
                     console.log(`✅ Đã xóa thành công ${deletedCount} user`);
+                    resolve(true)
                 } else {
                     console.log("❌ Không tìm thấy user để xóa");
+                    resolve(false)
                 }
-                resolve("Ok Create User")
+                
     
         }catch(e){
                 reject(e)
@@ -57,7 +69,23 @@ console.log("xóa username này :    ", user.username)
 
     })
 }
-
+let login = async(user) => {
+    
+    let userlogin = await db.Users.findOne(
+        {
+        where:{username: user.username,},
+        raw: true
+        });
+        console.log("check>> user đăng nhập: ", user)
+        console.log("check>> user query: ", userlogin)
+    if (!userlogin) {
+        console.log(">>>>> case 1") 
+        return false}
+    else if (await bcrypt.compare(user.password, userlogin.password)) {
+        console.log(">>>>> case 2")
+        return true}
+    else return false
+}
 let hashUserPassword= (password) => {
     return new Promise(async (resolve,reject) =>{
         try {
@@ -68,4 +96,5 @@ let hashUserPassword= (password) => {
         }
     })
 }
-export default {displapOrder,createUser,deleteUser}
+
+export default {displapOrder,createUser,deleteUser,login}

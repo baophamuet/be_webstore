@@ -21,6 +21,7 @@ const initWebRoutes = (app)=>{
     // })
 
     router.post(`/user`, homeController.postUser)
+    router.post(`/login`, homeController.loginUser)
     router.delete(`/deluser`, homeController.delUser)
 
     
