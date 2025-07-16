@@ -6,7 +6,9 @@ import { raw } from 'mysql2';
 let getHomePage = async (req,res) =>{
     try {
 
-        return  res.render('homePage.ejs',{data:JSON.stringify(data)})
+        return  res.render('homePage.ejs',
+        //    {data:JSON.stringify(data)}
+        )
     } catch (e) {
         console.log(e)
     }
@@ -50,5 +52,11 @@ let delUser = async(req,res) =>{
      let status = await CRUDService.deleteUser(req.body)   
       return  res.json({status, masssage:"Đây là trang delete User nhé!!!", })
 }
-export default {getHomePage,getUser,getOrder,postUser,delUser,loginUser}
+
+let updateUser= async(req,res) =>{
+     let status = await CRUDService.updateUser(req.body)   
+      return  res.json({status, masssage:"vừa thực hiện Update User nhé!!!", })
+}
+
+export default {getHomePage,getUser,getOrder,postUser,delUser,loginUser,updateUser}
 

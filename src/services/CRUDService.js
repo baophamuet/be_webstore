@@ -86,6 +86,35 @@ let login = async(user) => {
         return true}
     else return false
 }
+
+let updateUser =  async(user) => {
+    let hashUserPasswordFromBcrypt = await hashUserPassword(user.password)
+    let userDB = await db.Users.findOne(
+        {
+        where:{username: user.username,},
+        raw: true
+        });
+    if ((!userDB) ) return false;
+    
+    await db.Users.update(
+        {
+                    username: user.username,
+                    password: hashUserPasswordFromBcrypt ,
+                    email: user.email,
+                    full_name: user.full_name,
+                    gender: user.gender,
+                    role: user.role ,
+                    updated_at: new Date(),
+        },
+        {
+             where: { username: user.username }
+        }
+    )
+
+        console.log("check>> user đăng nhập: ", user)
+        console.log("check>> user query: ", userDB)
+        return true;
+}
 let hashUserPassword= (password) => {
     return new Promise(async (resolve,reject) =>{
         try {
@@ -97,4 +126,6 @@ let hashUserPassword= (password) => {
     })
 }
 
-export default {displapOrder,createUser,deleteUser,login}
+
+
+export default {displapOrder,createUser,deleteUser,login,updateUser}
