@@ -21,7 +21,10 @@ export default (sequelize, DataTypes) => {
     created_at: DataTypes.DATE
   }, {
     sequelize,
-    timestamps: false,
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+
     modelName: 'products',
   });
   return products;

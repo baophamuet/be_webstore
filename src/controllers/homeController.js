@@ -13,29 +13,31 @@ let getHomePage = async (req,res) =>{
         console.log(e)
     }
 }
-let getOrder = async (req,res) =>{
-    let user =req.body
-    let status = await CRUDService.displayOrder(user)
-    return res.json({status})
-    // return new Promise(async (resolve,reject) =>{
-    //       try {
-    //         let order =await db.orders.findAll({raw:true,})
-    //         console.log('>>>>>>>>>>>>>> check data:   ',order)
-    //         resolve(order)
-    //     return  res.render(
-    //         'detailOrder.ejs',
-    //         {data:order}
-    //     )
-    // } catch (e) {
-    //     console.log(e)
-    // }
-    // })
-}
-// lấy thông tin danh sách user
+
+
+/// Lấy thông tin 1 user khi truyền vào từ link
 let getUser = async(req,res) =>{
-    let data = await db.Users.findAll({raw:true});
-    console.log('>>>>>>>>>>>>>> check data:   ',data)
-    return  res.json({status:true, masssage:"Đây là trang Users nhé!!!", boss:"bao.phamthe đz 10 điểm ạ",})
+     //lấy ra id khi truyền vào từ req 
+    let id = req.url.replace('/users/','')
+
+    let user = await CRUDService.getUser(id)  
+
+    console.log("check req >>>>>:   ",id)
+    return  res.json({status:"true", data: user
+    
+        //masssage:"Thông tin tất cả sản phẩm! ", 
+    })
+
+}
+
+// lấy thông tin danh sách user
+let allUsers = async(req,res) =>{
+     let Users = await CRUDService.allUsers(req.body)   
+
+    return  res.json({status:"true", data: Users
+    
+        //masssage:"Thông tin tất cả sản phẩm! ", 
+    })
 
 }
 // Tạo user 
@@ -65,5 +67,88 @@ let updateUser= async(req,res) =>{
       return  res.json({status, masssage:"vừa thực hiện Update User nhé!!!", })
 }
 
-export default {getHomePage,getUser,getOrder,postUser,delUser,loginUser,updateUser}
+
+//lấy hông tin sản phẩm cụ thể
+
+let Product = async(req,res) =>{
+    let Product = await CRUDService.Product(req.body)   
+
+    return  res.json({status:"true", data: Product
+    
+        //masssage:"Thông tin sản phẩm cụ thể! ", 
+    })
+}
+
+// lấy thông tin tất cả sản phẩm
+let allProducts = async(req,res) =>{
+    let Products = await CRUDService.allProducts(req.body)   
+
+    return  res.json({status:"true", data: Products
+    
+        //masssage:"Thông tin tất cả sản phẩm! ", 
+    })
+}
+
+// thêm sản phẩm
+let addProduct = async(req,res) =>{
+    let status = await CRUDService.addProduct(req.body)   
+    console.log("Check status >>>>  : ",status)
+    return  res.json({status, 
+    
+        //masssage:"Bạn vừa cập thêm sản phẩm nhé! ", 
+    })
+}
+let updateProduct= async(req,res) =>{
+    let status = await CRUDService.updateProduct(req.body)   
+    console.log("Check status >>>>  : ",status)
+    return  res.json({status, 
+    
+        //masssage:"Bạn vừa cập cập nhật sản phẩm nhé !", 
+    })
+}
+let delProduct= async(req,res) =>{
+    let status = await CRUDService.delProduct(req.body)   
+    console.log("Check status >>>>  : ",status)
+    return  res.json({status, 
+    
+         //masssage:"Bạn vừa xóa sản phẩm nhé !", 
+    })
+}
+
+// lấy thông tin các đơn hàng của user được truyền vào từ req.body
+
+let getOrder = async (req,res) =>{
+    let user =req.body
+    let status = await CRUDService.displayOrder(user)
+    return res.json({status})
+    // return new Promise(async (resolve,reject) =>{
+    //       try {
+    //         let order =await db.orders.findAll({raw:true,})
+    //         console.log('>>>>>>>>>>>>>> check data:   ',order)
+    //         resolve(order)
+    //     return  res.render(
+    //         'detailOrder.ejs',
+    //         {data:order}
+    //     )
+    // } catch (e) {
+    //     console.log(e)
+    // }
+    // })
+}
+
+export default {
+    getHomePage,
+    getUser,
+    allUsers,
+    postUser,
+    delUser,
+    loginUser,
+    updateUser,
+    Product,
+    allProducts,
+    addProduct,
+    updateProduct,
+    delProduct,
+    getOrder,
+}
 

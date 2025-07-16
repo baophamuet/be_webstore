@@ -5,48 +5,23 @@ import bcrypt from 'bcryptjs'
 
 const salt = bcrypt.genSaltSync(10)
 
-let displayOrder = async(user) => {
-    const orderDetails = []
-    // trường hợp không gửi cả thông tin ID của user
-    let userquery = await db.Users.findOne({where: {username: user.username}, raw:true})
-    console.log('>>>>>>>>>>>>>> check user query:   ',userquery)
-    let order = await db.orders.findAll({
-        where:{
-          user_id: userquery.id,  
-        } ,
-        raw:true,})
-        // return new Promise(async (resolve,reject) =>{
-    //       try {
-    //         let order =await db.orders.findAll({raw:true,})
-    //         console.log('>>>>>>>>>>>>>> check data:   ',order)
-    //         resolve(order)
-    //     return  res.render(
-    //         'detailOrder.ejs',
-    //         {data:order}
-    //     )
-    // } catch (e) {
-    //     console.log(e)
-    // }
-    // })
-    
-   console.log('>>>>>>>>>>>>>> check data:   ',order)
-       for (let i = 0; i < order.length; i++) {
-        const orderby = order[i];
-        orderDetails.push({
-            // user_id: order.user_id,
-            // username: user.username,
-            status: orderby.status,
-            total_price: orderby.total_price,
-            created_at: orderby.created_at,
-        });
-    }
-    return {
-        masssage:`Chi tiết các lần order của khách ${user.username}`, 
-        data: orderDetails
+let getUser = async(id) => {
+    let User = await db.Users.findAll({where: {id: id, role: "user"},raw:true})
+    if (User?.length) return User
+    else {
+        let message = `Không tồn tại user người dùng trên hệ thống!`
+        return message
     }
 
 }
-
+let allUsers = async() => {
+    let Users = await db.Users.findAll({where: {role: 'user' },raw:true})
+    if (Users) return {Count:Users.length, Users}
+    else {
+        let message = `Danh sách chưa có user người dùng nào `
+        return message
+    }
+}
 let createUser = async(user) => {
     let checkuser = await db.Users.findOne(
         {
@@ -165,7 +140,161 @@ let hashUserPassword= (password) => {
         }
     })
 }
+let Product = async(product) =>{
+    let productcheck = await checkproduct(product)
+    let masssage
+    //kiểm tra tồn tại product này chưa 
+    if (productcheck) {
+          
+        return  productcheck
+    }
+    else {
+        let message = `Không có thông tin về sản phẩm ${product.name}`
+        return message
+    }
+}
+let allProducts = async(products) =>{
+    let Products = await db.products.findAll({raw:true})
+    if (Products)    return Products
+    else {
+        let message = `Chưa có sản phẩm nào được thêm`
+        return message
+    }
+}
+let addProduct = async(product) =>{
+    // let checkproduct = await db.products.findOne({
+    //     where: {name: product.name},
+    //     raw: true
+    // })
+    // console.log("Check checkproduct >>>>  : ",checkproduct)
+
+    //console.log("Check checkproduct(product) >>>>  : ",await checkproduct(product))
+    //kiểm tra tồn tại product này chưa 
+    if (await checkproduct(product)) return false
+    await db.products.create({
+        name: product.name,
+        category_id: product.category_id,
+        description: product.description,
+        price: product.price,
+        stock: product.stock,
+        created_at: new Date(),
+        updated_at: new Date()
+    })
+    return true
+
+}
+let updateProduct = async(product) => {
+    let productUpdate = await checkproduct(product)
+    //console.log("Check productUpdate >>>>: ",productUpdate)
+    //kiểm tra tồn tại product này chưa 
+    if (productUpdate)
+    {
+        await db.products.update(
+        {
+        "name": product.name,
+        "category_id": product.category_id,
+        "description": product.description,
+        "price": product.price,
+        "stock": product.stock,
+        "updated_at": new Date(),
+
+        },{
+             where: { name: product.name }
+        }
+    )
+    let datenow=new Date()
+        console.log("datetime: ",datenow )
+        return true
+
+    }
+    else return false
+}
+let delProduct = async(product) => {
+    let productUpdate = await checkproduct(product)
+
+    //kiểm tra tồn tại product này chưa 
+    if (productUpdate)
+    {
+        await db.products.destroy(
+        {
+             where: { id: productUpdate.id }
+        }
+        )
+        return true
+    }
+    else return false
+}
+
+let checkproduct = async(product) => {
+    let productquery = await db.products.findOne({
+    where: { name: product.name},
+    raw:true,
+    })
+    console.log("Check productquery >>>>: ",productquery)
+    if (productquery) {
+        return productquery
+    }
+    else return false
+    
+}
 
 
+let displayOrder = async(user) => {
+    const orderDetails = []
+    // trường hợp không gửi cả thông tin ID của user
+    let userquery = await db.Users.findOne({where: {username: user.username}, raw:true})
+    console.log('>>>>>>>>>>>>>> check user query:   ',userquery)
+    let order = await db.orders.findAll({
+        where:{
+          user_id: userquery.id,  
+        } ,
+        raw:true,})
+        // return new Promise(async (resolve,reject) =>{
+    //       try {
+    //         let order =await db.orders.findAll({raw:true,})
+    //         console.log('>>>>>>>>>>>>>> check data:   ',order)
+    //         resolve(order)
+    //     return  res.render(
+    //         'detailOrder.ejs',
+    //         {data:order}
+    //     )
+    // } catch (e) {
+    //     console.log(e)
+    // }
+    // })
+    
+   console.log('>>>>>>>>>>>>>> check data:   ',order)
+    for (let i = 0; i < order.length; i++) {
+        const orderby = order[i];
+        orderDetails.push({
+            user_id: orderby.user_id,
+            username: user.username,
+            order_id: orderby.id,
+            status: orderby.status,
+            total_price: orderby.total_price,
+            created_at: orderby.created_at,
+        });
+    }
+    return {
+        masssage:`Chi tiết các lần order của khách ${user.username}`, 
+        data: orderDetails
+    }
 
-export default {displayOrder,createUser,deleteUser,login,updateUser}
+}
+
+
+export default {
+    displayOrder,
+    getUser,
+    allUsers,
+    createUser,
+    deleteUser,
+    login,
+    updateUser,
+    Product,
+    allProducts,
+    addProduct,
+    updateProduct,
+    delProduct,
+
+}

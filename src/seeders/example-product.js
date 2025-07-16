@@ -73,3 +73,10 @@ export default {
     await queryInterface.bulkDelete('products', null, {});
   }
 };
+// {
+// 	    "name": "Xiaomi 13 pro",
+//         "category_id": 4,
+//        "description": "Flagship Apple smartphone",
+//         "price": "1299",
+//         "stock": 50
+// }

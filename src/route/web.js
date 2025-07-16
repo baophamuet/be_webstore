@@ -9,21 +9,27 @@ const initWebRoutes = (app)=>{
     router.get('/home', (req,res)=>{
         return  res.json({status:true, masssage:"Đây là trang chủ", boss:"bao.phamthe đz 10 điểm thôi nhé",})
     })
-    router.get('/users', homeController.getUser)
-    router.get('/users/1', (req,res)=>{
-        return  res.json({status:true, masssage:"Đây là trang user1",})
-    })
 
-    router.get('/orders',  homeController.getOrder)
-    // router.post(`/users/`, (req,res) =>{
-    //     let {user} = req.body
-    //      return  res.json({status:true, masssage:`Bạn vừa yêu cầu post user có id bằng ${id=id+1} `, masssage2: user})
-    // })
+
+    // cấu hình thêm/lấy/sửa/ xóa user
+    router.get('/users', homeController.allUsers)
+    router.get(`/users/:id`,homeController.getUser)
 
     router.post(`/user`, homeController.postUser)
     router.post(`/login`, homeController.loginUser)
     router.delete(`/deluser`, homeController.delUser)
     router.put('/user', homeController.updateUser)
+
+    // cấu hình thêm/lấy/sửa/ xóa sản phẩm
+    router.get(`/product`,homeController.Product)
+    router.get(`/products`,homeController.allProducts)
+    router.post(`/product`,homeController.addProduct)
+    router.put(`/product`,homeController.updateProduct)
+    router.delete(`/product`,homeController.delProduct)
+
+    // cấu hình lấy sản phẩm theo user truyền vào từ req.body
+    router.get('/orders',  homeController.getOrder)
+
 
     
 
