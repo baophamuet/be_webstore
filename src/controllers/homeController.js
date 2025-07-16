@@ -14,32 +14,37 @@ let getHomePage = async (req,res) =>{
     }
 }
 let getOrder = async (req,res) =>{
-    return new Promise(async (resolve,reject) =>{
-          try {
-            let order =await db.orders.findAll({raw:true,})
-            console.log('>>>>>>>>>>>>>> check data:   ',order)
-            resolve(order)
-        return  res.render(
-            'detailOrder.ejs',
-            {data:order}
-        )
-    } catch (e) {
-        console.log(e)
-    }
-    })
+    let user =req.body
+    let status = await CRUDService.displayOrder(user)
+    return res.json({status})
+    // return new Promise(async (resolve,reject) =>{
+    //       try {
+    //         let order =await db.orders.findAll({raw:true,})
+    //         console.log('>>>>>>>>>>>>>> check data:   ',order)
+    //         resolve(order)
+    //     return  res.render(
+    //         'detailOrder.ejs',
+    //         {data:order}
+    //     )
+    // } catch (e) {
+    //     console.log(e)
+    // }
+    // })
 }
-
+// lấy thông tin danh sách user
 let getUser = async(req,res) =>{
     let data = await db.Users.findAll({raw:true});
     console.log('>>>>>>>>>>>>>> check data:   ',data)
     return  res.json({status:true, masssage:"Đây là trang Users nhé!!!", boss:"bao.phamthe đz 10 điểm ạ",})
 
 }
-
+// Tạo user 
 let postUser = async(req,res) =>{
     let status =await CRUDService.createUser(req.body)
     return  res.json({status, masssage:"Đây là trang add User nhé!!!", })
 }
+
+// login user
 let loginUser=async(req,res) =>{
     let status=await CRUDService.login(req.body) 
     if (status) {
@@ -48,11 +53,13 @@ let loginUser=async(req,res) =>{
     return  res.json({status, masssage:"Bạn đăng nhập sai username/password!!!"})
 }
 
+/// xóa user
 let delUser = async(req,res) =>{
      let status = await CRUDService.deleteUser(req.body)   
       return  res.json({status, masssage:"Đây là trang delete User nhé!!!", })
 }
 
+// cập nhật thông tin user
 let updateUser= async(req,res) =>{
      let status = await CRUDService.updateUser(req.body)   
       return  res.json({status, masssage:"vừa thực hiện Update User nhé!!!", })

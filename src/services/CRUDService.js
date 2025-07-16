@@ -1,12 +1,49 @@
 import { raw } from 'mysql2'
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
 import db from '../models/index.js'
 import bcrypt from 'bcryptjs'
 
 const salt = bcrypt.genSaltSync(10)
 
-let displapOrder = () => {
-
+let displayOrder = async(user) => {
+    const orderDetails = []
+    // trường hợp không gửi cả thông tin ID của user
+    let userquery = await db.Users.findOne({where: {username: user.username}, raw:true})
+    console.log('>>>>>>>>>>>>>> check user query:   ',userquery)
+    let order = await db.orders.findAll({
+        where:{
+          user_id: userquery.id,  
+        } ,
+        raw:true,})
+        // return new Promise(async (resolve,reject) =>{
+    //       try {
+    //         let order =await db.orders.findAll({raw:true,})
+    //         console.log('>>>>>>>>>>>>>> check data:   ',order)
+    //         resolve(order)
+    //     return  res.render(
+    //         'detailOrder.ejs',
+    //         {data:order}
+    //     )
+    // } catch (e) {
+    //     console.log(e)
+    // }
+    // })
+    
+   console.log('>>>>>>>>>>>>>> check data:   ',order)
+       for (let i = 0; i < order.length; i++) {
+        const orderby = order[i];
+        orderDetails.push({
+            // user_id: order.user_id,
+            // username: user.username,
+            status: orderby.status,
+            total_price: orderby.total_price,
+            created_at: orderby.created_at,
+        });
+    }
+    return {
+        masssage:`Chi tiết các lần order của khách ${user.username}`, 
+        data: orderDetails
+    }
 
 }
 
@@ -16,8 +53,11 @@ let createUser = async(user) => {
             where:{username: user.username,},
             raw: true
         });
-    console.log(">>>>> tạo ",checkuser)
-    if (checkuser) return false
+    console.log(">>>>> muốn tạo ",checkuser)
+    if (checkuser) {
+        console.log("Tạo không thành công do đã tồn tại username")
+        return false
+    }
     return new Promise (async(resolve,reject)=>{
         try {
                let hashUserPasswordFromBcrypt = await hashUserPassword(user.password)
@@ -128,4 +168,4 @@ let hashUserPassword= (password) => {
 
 
 
-export default {displapOrder,createUser,deleteUser,login,updateUser}
+export default {displayOrder,createUser,deleteUser,login,updateUser}
