@@ -1,20 +1,31 @@
 'use strict';
 
 import { readdirSync } from 'node:fs';
-import { basename as pathBasename, join } from 'node:path';
+import { basename as pathBasename, join, dirname  } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import Sequelize from 'sequelize';
+import 'dotenv/config'
+
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = fileURLToPath(new URL('.', import.meta.url));
+//const currentFileBasename = pathBasename(__filename);
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
+const __dirname = dirname(__filename);
 const currentFileBasename = pathBasename(__filename);
 
 const env = process.env.NODE_ENV || 'development';
 
 // Cách import JSON an toàn cho Windows
-const configPath = join(__dirname, '../config/config.json');
+// const configPath = join(__dirname, '../config/config.js');
+// const configURL = pathToFileURL(configPath).href;
+// const config = (await import(configURL, { with: { type: 'json' } })).default[env];
+
+// 👉 Lấy config từ ../config/config.js
+const configPath = join(__dirname, '../config/config.js');
 const configURL = pathToFileURL(configPath).href;
-const config = (await import(configURL, { with: { type: 'json' } })).default[env];
+const configModule = await import(configURL);
+const config = configModule.default[env];
 
 const db = {};
 

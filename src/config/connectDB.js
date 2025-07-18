@@ -1,14 +1,25 @@
 import { Sequelize } from "sequelize"
+import 'dotenv/config'
+
 
 const sequelize = new Sequelize(
-     "webstore",
-    "root",
+     process.env.DB_DATABASE_NAME,
+    process.env.DB_USERNAME,
     null,
+    
     {
-        "host": "127.0.0.1",
-        "dialect": "mysql"
+        "host": process.env.DB_HOST,
+        "dialect": process.env.DB_DIALECT,
+        "logging": false,
     }   
 )
+    // "username": process.dotenv.DB_USERNAME,
+    // "password": process.dotenv.DB_PASSWORD,
+    // "database": process.dotenv.DB_DATABASE_NAME,
+    // "host": process.dotenv.DB_HOST,
+    // "port": process.dotenv.DB_PORT,
+    // "dialect": process.dotenv.DB_DIALECT,
+    // "logging": process.dotenv.DB_TIMEZONE,
 
 let  connectDB = async() =>{
     try {
