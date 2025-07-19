@@ -6,7 +6,7 @@ COPY package*.json ./
 
 RUN npm install
 
-#RUN  npm install -g @b
+RUN  npm install -g @babel/cli @babel/core @babel/preset-env
 
 COPY . .
 
