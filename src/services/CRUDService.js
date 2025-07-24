@@ -6,7 +6,10 @@ import bcrypt from 'bcryptjs'
 const salt = bcrypt.genSaltSync(10)
 
 let getUser = async(id) => {
-    let User = await db.Users.findAll({where: {id: id, role: "user"},raw:true})
+    let User = await db.Users.findAll({where: {id: id, role: "user"},
+        raw:true,
+        attributes:{exclude:['password','updated_at',]},                         
+    })
     if (User?.length) return User
     else {
         let message = `Không tồn tại user người dùng trên hệ thống!`
@@ -15,7 +18,9 @@ let getUser = async(id) => {
 
 }
 let allUsers = async() => {
-    let Users = await db.Users.findAll({where: {role: 'user' },raw:true})
+    let Users = await db.Users.findAll({where: {role: 'user' },raw:true,
+        attributes:{exclude:['password','updated_at',]},
+    })
     if (Users) return {Count:Users.length, Users}
     else {
         let message = `Danh sách chưa có user người dùng nào `
@@ -26,7 +31,7 @@ let createUser = async(user) => {
     let checkuser = await db.Users.findOne(
         {
             where:{username: user.username,},
-            raw: true
+            raw: true,
         });
     console.log(">>>>> muốn tạo ",checkuser)
     if (checkuser) {
@@ -142,7 +147,7 @@ let hashUserPassword= (password) => {
 }
 let Product = async(product) =>{
     let productcheck = await checkproduct(product)
-    let masssage
+    let message
     //kiểm tra tồn tại product này chưa 
     if (productcheck) {
           
@@ -276,7 +281,7 @@ let displayOrder = async(user) => {
         });
     }
     return {
-        masssage:`Chi tiết các lần order của khách ${user.username}`, 
+        message:`Chi tiết các lần order của khách ${user.username}`, 
         data: orderDetails
     }
 

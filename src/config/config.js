@@ -12,6 +12,10 @@ export default
     "port": process.env.DB_PORT,
     "dialect": process.env.DB_DIALECT,
     "logging": false,
+    "query":{
+      "raw":true,
+    },
+    "timezone":process.env.DB_TIMEZONE,
   }
 //   DB_PASSWORD= null
 // DB_DATABASE_NAME ="webstore"

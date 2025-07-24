@@ -25,7 +25,7 @@ let getUser = async(req,res) =>{
     console.log("check req >>>>>:   ",id)
     return  res.json({status:"true", data: user
     
-        //masssage:"Thông tin tất cả sản phẩm! ", 
+        //message:"Thông tin tất cả sản phẩm! ", 
     })
 
 }
@@ -36,35 +36,35 @@ let allUsers = async(req,res) =>{
 
     return  res.json({status:"true", data: Users
     
-        //masssage:"Thông tin tất cả sản phẩm! ", 
+        //message:"Thông tin tất cả sản phẩm! ", 
     })
 
 }
 // Tạo user 
 let postUser = async(req,res) =>{
     let status =await CRUDService.createUser(req.body)
-    return  res.json({status, masssage:"Đây là trang add User nhé!!!", })
+    return  res.json({status, message:"Đây là trang add User nhé!!!", })
 }
 
 // login user
 let loginUser=async(req,res) =>{
     let status=await CRUDService.login(req.body) 
     if (status) {
-        return res.json({status, masssage:`Bạn đăng nhập thành công user ${req.body.username}!!!`})
+        return res.json({status, message:`Bạn đăng nhập thành công user ${req.body.username}!!!`})
     } else
-    return  res.json({status, masssage:"Bạn đăng nhập sai username/password!!!"})
+    return  res.json({status, message:"Bạn đăng nhập sai username/password!!!"})
 }
 
 /// xóa user
 let delUser = async(req,res) =>{
      let status = await CRUDService.deleteUser(req.body)   
-      return  res.json({status, masssage:"Đây là trang delete User nhé!!!", })
+      return  res.json({status, message:"Đây là trang delete User nhé!!!", })
 }
 
 // cập nhật thông tin user
 let updateUser= async(req,res) =>{
      let status = await CRUDService.updateUser(req.body)   
-      return  res.json({status, masssage:"vừa thực hiện Update User nhé!!!", })
+      return  res.json({status, message:"vừa thực hiện Update User nhé!!!", })
 }
 
 
@@ -75,7 +75,7 @@ let Product = async(req,res) =>{
 
     return  res.json({status:"true", data: Product
     
-        //masssage:"Thông tin sản phẩm cụ thể! ", 
+        //message:"Thông tin sản phẩm cụ thể! ", 
     })
 }
 
@@ -85,7 +85,7 @@ let allProducts = async(req,res) =>{
 
     return  res.json({status:"true", data: Products
     
-        //masssage:"Thông tin tất cả sản phẩm! ", 
+        //message:"Thông tin tất cả sản phẩm! ", 
     })
 }
 
@@ -95,7 +95,7 @@ let addProduct = async(req,res) =>{
     console.log("Check status >>>>  : ",status)
     return  res.json({status, 
     
-        //masssage:"Bạn vừa cập thêm sản phẩm nhé! ", 
+        //message:"Bạn vừa cập thêm sản phẩm nhé! ", 
     })
 }
 let updateProduct= async(req,res) =>{
@@ -103,7 +103,7 @@ let updateProduct= async(req,res) =>{
     console.log("Check status >>>>  : ",status)
     return  res.json({status, 
     
-        //masssage:"Bạn vừa cập cập nhật sản phẩm nhé !", 
+        //message:"Bạn vừa cập cập nhật sản phẩm nhé !", 
     })
 }
 let delProduct= async(req,res) =>{
@@ -111,7 +111,7 @@ let delProduct= async(req,res) =>{
     console.log("Check status >>>>  : ",status)
     return  res.json({status, 
     
-         //masssage:"Bạn vừa xóa sản phẩm nhé !", 
+         //message:"Bạn vừa xóa sản phẩm nhé !", 
     })
 }
 

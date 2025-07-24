@@ -7,10 +7,17 @@ let id=1;
 const initWebRoutes = (app)=>{
     router.get('/',  homeController.getHomePage)
     router.get('/home', (req,res)=>{
-        return  res.json({status:true, masssage:"Đây là trang chủ", boss:"bao.phamthe đz 10 điểm thôi nhé",})
+        return  res.json({status:true, message:"Đây là trang chủ", boss:"bao.phamthe đz 10 điểm thôi nhé",})
     })
 
-
+    // Thêm middleware CORS đúng cách
+    router.use(function(req, res, next) {
+        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        next();
+    });
     // cấu hình thêm/lấy/sửa/ xóa user
     router.get('/users', homeController.allUsers)
     router.get(`/users/:id`,homeController.getUser)
