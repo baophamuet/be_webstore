@@ -6,11 +6,10 @@ import bcrypt from 'bcryptjs'
 const salt = bcrypt.genSaltSync(10)
 
 let getUser = async(id) => {
-    let User = await db.Users.findAll({where: {id: id, role: "user"},
-        raw:true,
+    let User = await db.Users.findOne({where: {id: id,},
         attributes:{exclude:['password','updated_at',]},                         
     })
-    if (User?.length) return User
+    if (User) return User
     else {
         let message = `Không tồn tại user người dùng trên hệ thống!`
         return message
@@ -103,7 +102,7 @@ let login = async(user) => {
         return false}
     else if (await bcrypt.compare(user.password, userlogin.password)) {
         console.log(">>>>> case 2")
-        return true}
+        return {data: true, role:userlogin.role, id: userlogin.id}}
     else return false
 }
 
