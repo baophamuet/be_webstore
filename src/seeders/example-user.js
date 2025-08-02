@@ -16,6 +16,7 @@ export default {
       full_name: "Na Na",
       gender: "female",
       role: "user",
+      pathAvatar: "",
       created_at: new Date(),
   },
   {
@@ -25,6 +26,7 @@ export default {
       full_name: "Phạm Thế Bảo",
       gender: "male",
       role: "admin",
+      pathAvatar: "",
       created_at: new Date(),
   },
   {
@@ -34,6 +36,7 @@ export default {
       full_name: "He He Boy",
       gender: "male",
       role: "user",
+      pathAvatar: "",
       created_at: new Date(),
   },
       //   "username": "heheboy",

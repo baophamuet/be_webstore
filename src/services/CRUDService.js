@@ -53,7 +53,7 @@ let createUser = async(user,file) => {
                     full_name: user.full_name,
                     gender: user.gender,
                     role: user.role ,
-                    pathAvatar: user.pathAvatar,
+                    pathAvatar: user?.pathAvatar || '',
                     created_at: new Date(),
                 })
     
