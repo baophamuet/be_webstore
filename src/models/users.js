@@ -19,7 +19,9 @@ export default (sequelize, DataTypes) => {
     full_name: DataTypes.STRING,
     gender: DataTypes.STRING,
     role: DataTypes.STRING,
-    created_at: DataTypes.DATE
+    pathAvatar: DataTypes.STRING,
+    created_at: DataTypes.DATE,
+
   }, {
     sequelize,
     timestamps: true,

@@ -42,7 +42,12 @@ let allUsers = async(req,res) =>{
 }
 // Tạo user 
 let postUser = async(req,res) =>{
+    // Gắn đường dẫn ảnh vào req.body
+    req.body.pathAvatar = req.file ? `/uploads/images/avatar/${req.file.filename}`: null;
+
     let status =await CRUDService.createUser(req.body)
+    console.log("Check body req >>>>>: ", req.body)
+    
     return  res.json({status, message:"Đây là trang add User nhé!!!", })
 }
 
@@ -63,7 +68,13 @@ let delUser = async(req,res) =>{
 
 // cập nhật thông tin user
 let updateUser= async(req,res) =>{
-     let status = await CRUDService.updateUser(req.body)   
+
+    // Gắn đường dẫn ảnh vào req.body
+     req.body.pathAvatar = req.file ? `/uploads/images/avatar/${req.file.filename}`: null;
+
+    console.log("Check req.body update user: >>>>:", req.body)
+     let status = await CRUDService.updateUser(req.body)
+   // console.log("Check req.file update user: >>>>:", req.file)    
       return  res.json({status, message:"vừa thực hiện Update User nhé!!!", })
 }
 

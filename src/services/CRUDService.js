@@ -3,7 +3,10 @@ import { Op, where } from 'sequelize';
 import db from '../models/index.js'
 import bcrypt from 'bcryptjs'
 
+
 const salt = bcrypt.genSaltSync(10)
+
+
 
 let getUser = async(id) => {
     let User = await db.Users.findOne({where: {id: id,},
@@ -26,13 +29,15 @@ let allUsers = async() => {
         return message
     }
 }
-let createUser = async(user) => {
+let createUser = async(user,file) => {
     let checkuser = await db.Users.findOne(
         {
             where:{username: user.username,},
             raw: true,
         });
     console.log(">>>>> muốn tạo ",checkuser)
+    
+    //let avatar = req.file?.filename;
     if (checkuser) {
         console.log("Tạo không thành công do đã tồn tại username")
         return false
@@ -48,6 +53,7 @@ let createUser = async(user) => {
                     full_name: user.full_name,
                     gender: user.gender,
                     role: user.role ,
+                    pathAvatar: user.pathAvatar,
                     created_at: new Date(),
                 })
     
@@ -107,14 +113,47 @@ let login = async(user) => {
 }
 
 let updateUser =  async(user) => {
-    let hashUserPasswordFromBcrypt = await hashUserPassword(user.password)
+    let hashUserPasswordFromBcrypt = await hashUserPassword(user.newPassword)
+    
     let userDB = await db.Users.findOne(
         {
         where:{username: user.username,},
         raw: true
         });
     if ((!userDB) ) return false;
-    
+    if (!user.pathAvatar)  {
+        await db.Users.update(
+        {
+                    username: user.username,
+                    email: user.email,
+                    full_name: user.full_name,
+                    gender: user.gender,
+                    role: userDB.role ,
+                    updated_at: new Date(),
+        },
+        {
+             where: { username: user.username }
+        }
+    )
+        return {status: true, data: userDB};
+    } 
+    else if (user.oldPassword === 'null' && user.newPassword === 'null'){
+         await db.Users.update(
+        {
+                    username: user.username,
+                    email: user.email,
+                    full_name: user.full_name,
+                    gender: user.gender,
+                    role: userDB.role ,
+                    pathAvatar: user.pathAvatar,
+                    updated_at: new Date(),
+        },
+        {
+             where: { username: user.username }
+        }
+    )
+        return {status: true, data: userDB};
+    } else if (await bcrypt.compare(user.oldPassword, userDB.password)){
     await db.Users.update(
         {
                     username: user.username,
@@ -122,7 +161,8 @@ let updateUser =  async(user) => {
                     email: user.email,
                     full_name: user.full_name,
                     gender: user.gender,
-                    role: user.role ,
+                    role: userDB.role ,
+                    pathAvatar: user.pathAvatar,
                     updated_at: new Date(),
         },
         {
@@ -130,9 +170,16 @@ let updateUser =  async(user) => {
         }
     )
 
-        console.log("check>> user đăng nhập: ", user)
-        console.log("check>> user query: ", userDB)
-        return true;
+        //console.log("check>> user đăng nhập: ", user)
+       // console.log("check>> user query: ", userDB)
+        return {status: true, data: userDB};
+    } else
+    {
+         console.log("Nhập sai mật khẩu hiện tại")
+        return false
+    }
+        
+    
 }
 let hashUserPassword= (password) => {
     return new Promise(async (resolve,reject) =>{

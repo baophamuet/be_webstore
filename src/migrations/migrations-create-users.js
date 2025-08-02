@@ -26,6 +26,9 @@ export default {
       role: {
         type: Sequelize.ENUM('admin', 'user')
       },
+      pathAvatar: {
+        type: Sequelize.STRING
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
