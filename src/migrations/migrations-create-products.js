@@ -28,6 +28,11 @@ export default {
       stock: {
         type: Sequelize.INTEGER
       },
+      images: {
+        type: Sequelize.JSON, // Hoặc Sequelize.ARRAY(Sequelize.STRING) nếu dùng PostgreSQL
+        defaultValue: [],     // Giá trị mặc định là mảng rỗng
+        allowNull: true       // Cho phép NULL nếu cần
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,

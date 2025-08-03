@@ -18,6 +18,7 @@ export default (sequelize, DataTypes) => {
     description: DataTypes.TEXT,
     price: DataTypes.STRING,
     stock: DataTypes.INTEGER,
+    images: DataTypes.JSON, // Lưu trữ nhiều ảnh dưới dạng JSON
     created_at: DataTypes.DATE
   }, {
     sequelize,
