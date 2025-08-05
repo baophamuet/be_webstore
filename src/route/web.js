@@ -35,9 +35,23 @@ const upload = multer({ storage: storage });
 const initWebRoutes = (app)=>{
   // Cho phép truy cập ảnh trong thư mục uploads/
   app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+  const allowedOrigins = [
+    'http://localhost:3000', /// development
+    'http://localhost:3001', // development
+    'http://localhost:3002', // development
+    'http://localhost:3003', // development
+    'https://baophamuet.site',
+    'https://www.baophamuet.site',
+    'https://new.baophamuet.site',
+    'https://paper.baophamuet.site',
+    
+  ];
     // Thêm middleware CORS đúng cách
     router.use(function(req, res, next) {
-        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+        const origin = req.headers.origin;
+        if (allowedOrigins.includes(origin)) {
+          res.setHeader('Access-Control-Allow-Origin', origin);
+        }
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         res.setHeader('Access-Control-Allow-Credentials', 'true');
