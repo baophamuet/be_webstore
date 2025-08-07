@@ -2,6 +2,8 @@ import express from 'express'
 import db from '../models/index.js'
 import CRUDService from "../services/CRUDService.js"
 import { raw } from 'mysql2';
+import jwt from 'jsonwebtoken';
+
 
 let getHomePage = async (req,res) =>{
     try {
@@ -55,7 +57,23 @@ let postUser = async(req,res) =>{
 let loginUser=async(req,res) =>{
     let status=await CRUDService.login(req.body) 
     if (status) {
-        return res.json({status, message:`Bạn đăng nhập thành công user ${req.body.username}!!!`})
+         // Tạo session lưu user
+        req.session.user = {
+            id: req.body.id,
+            username: req.body.username,
+            role: req.body.role,
+        };
+        const token = jwt.sign(
+            req.session.user,
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN }
+        );
+        console.log(">> check userSession: ",req.session.user)
+        return res.json({status, 
+            token:token,
+            userSession:req.session.user,
+            
+            message:`Bạn đăng nhập thành công user ${req.body.username}!!!`})
     } else
     return  res.json({status, message:"Bạn đăng nhập sai username/password!!!"})
 }
@@ -91,11 +109,12 @@ let Product = async(req,res) =>{
 }
 
 // lấy thông tin tất cả sản phẩm
-let allProducts = async(req,res) =>{
+let allProduct = async(req,res) =>{
     let Products = await CRUDService.allProducts(req.body)   
 
-    return  res.json({status:"true", data: Products
-    
+    return  res.json({status:"true", data: Products,
+            views: req.session.views,  // nếu muốn kiểm tra thêm
+            lastVisit: req.cookies.last_visit // nếu muốn trả về cookie
         //message:"Thông tin tất cả sản phẩm! ", 
     })
 }
@@ -156,7 +175,7 @@ export default {
     loginUser,
     updateUser,
     Product,
-    allProducts,
+    allProduct,
     addProduct,
     updateProduct,
     delProduct,

@@ -4,6 +4,8 @@ import multer from 'multer';
 import path from "path"
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
 
 // Tạo __dirname thủ công vì đang dùng ES Module
 const __filename = fileURLToPath(import.meta.url);
@@ -33,8 +35,25 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const initWebRoutes = (app)=>{
+
+  // Middleware cho cookie và session
+  app.use(cookieParser());
+
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'heheboydeptraivocungtan', // Nên dùng biến môi trường
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+      secure: process.env.NODE_ENV === 'production', // true nếu production (HTTPS)
+      maxAge: 24 * 60 * 60 * 1000, // 24 giờ
+      httpOnly: true
+    }
+  }));
+
   // Cho phép truy cập ảnh trong thư mục uploads/
   app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+  
+  // các FE cho phép gọi xuống BE
   const allowedOrigins = [
     'http://localhost:3000', /// development
     'http://localhost:3001', // development
@@ -46,7 +65,7 @@ const initWebRoutes = (app)=>{
     'https://paper.baophamuet.site',
     
   ];
-    // Thêm middleware CORS đúng cách
+    //middleware CORS đúng cách
     router.use(function(req, res, next) {
         const origin = req.headers.origin;
         if (allowedOrigins.includes(origin)) {
@@ -64,6 +83,14 @@ const initWebRoutes = (app)=>{
     
     router.get('/',  homeController.getHomePage)
     router.get('/home', (req,res)=>{
+      // Ví dụ sử dụng session
+      req.session.views = (req.session.views || 0) + 1;
+      // Ví dụ sử dụng cookie
+      res.cookie('last_visit', new Date().toISOString(), { 
+        maxAge: 900000, 
+        httpOnly: true 
+      });
+    
         return  res.json({status:true, message:"Đây là trang chủ", boss:"bao.phamthe đz 10 điểm thôi nhé",})
     })
     // cấu hình thêm/lấy/sửa/ xóa user
@@ -73,13 +100,35 @@ const initWebRoutes = (app)=>{
     router.post(`/user`,upload.single('profile_avt'),
    
     homeController.postUser)
-    router.post(`/login`, homeController.loginUser)
+    router.post(`/login`, 
+      (req,res)=>{
+      // Ví dụ sử dụng session
+      req.session.views = (req.session.views || 0) + 1;
+      // Ví dụ sử dụng cookie
+      res.cookie('last_visit', new Date().toISOString(), { 
+        maxAge: 900000, 
+        httpOnly: true 
+      });
+
+      homeController.loginUser(req,res)
+    })
     router.delete(`/deluser`, homeController.delUser)
     router.put('/user', upload.single('profile_avt'),homeController.updateUser)
 
     // cấu hình thêm/lấy/sửa/ xóa sản phẩm
     router.get(`/product`,homeController.Product)
-    router.get(`/products`,homeController.allProducts)
+    router.get(`/products`,
+      (req,res)=>{
+      // Ví dụ sử dụng session
+      req.session.views = (req.session.views || 0) + 1;
+      // Ví dụ sử dụng cookie
+      res.cookie('last_visit', new Date().toISOString(), { 
+        maxAge: 900000, 
+        httpOnly: true 
+      });
+      // GỌI controller
+      return homeController.allProduct(req, res);
+    })
     router.post(`/product`,homeController.addProduct)
     router.put(`/product`,homeController.updateProduct)
     router.delete(`/product`,homeController.delProduct)
