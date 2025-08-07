@@ -108,7 +108,7 @@ let login = async(user) => {
         return false}
     else if (await bcrypt.compare(user.password, userlogin.password)) {
         console.log(">>>>> case 2")
-        return {data: true, role:userlogin.role, id: userlogin.id}}
+        return {data: true, username:userlogin.username, role:userlogin.role, id: userlogin.id}}
     else return false
 }
 

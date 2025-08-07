@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+import { authMiddleware } from './authMiddleware.js';
 
 // Tạo __dirname thủ công vì đang dùng ES Module
 const __filename = fileURLToPath(import.meta.url);
@@ -117,8 +118,13 @@ const initWebRoutes = (app)=>{
 
     // cấu hình thêm/lấy/sửa/ xóa sản phẩm
     router.get(`/product`,homeController.Product)
-    router.get(`/products`,
+    router.get(`/products`,authMiddleware,
       (req,res)=>{
+
+        if (req.user.role !== "admin") {
+        return res.status(403).json({ message: "Không có quyền truy cập" });
+      }
+
       // Ví dụ sử dụng session
       req.session.views = (req.session.views || 0) + 1;
       // Ví dụ sử dụng cookie

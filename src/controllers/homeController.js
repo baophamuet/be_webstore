@@ -59,9 +59,9 @@ let loginUser=async(req,res) =>{
     if (status) {
          // Tạo session lưu user
         req.session.user = {
-            id: req.body.id,
-            username: req.body.username,
-            role: req.body.role,
+            id: status.id,
+            username: status.username,
+            role: status.role,
         };
         const token = jwt.sign(
             req.session.user,
@@ -69,9 +69,18 @@ let loginUser=async(req,res) =>{
             { expiresIn: process.env.JWT_EXPIRES_IN }
         );
         console.log(">> check userSession: ",req.session.user)
-        return res.json({status, 
-            token:token,
-            userSession:req.session.user,
+
+          // 👉 Set cookie chứa token
+        res.cookie("token", token, {
+                httpOnly: true,
+                secure: true,           // Bắt buộc nếu dùng HTTPS
+                sameSite: "Strict",     // Chống CSRF
+                maxAge: 24 * 60 * 60 * 1000 // 1 ngày
+            });
+        return res.json({
+            status, 
+            token,
+            //userSession:req.session.user,
             
             message:`Bạn đăng nhập thành công user ${req.body.username}!!!`})
     } else
