@@ -37,19 +37,20 @@ const upload = multer({ storage: storage });
 
 const initWebRoutes = (app)=>{
 
-  // Middleware cho cookie và session
+  // Middleware cho cookie 
   app.use(cookieParser());
 
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'heheboydeptraivocungtan', // Nên dùng biến môi trường
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-      secure: process.env.NODE_ENV === 'production', // true nếu production (HTTPS)
-      maxAge: 24 * 60 * 60 * 1000, // 24 giờ
-      httpOnly: true
-    }
-  }));
+  // Middleware cho session
+  // app.use(session({
+  //   secret: process.env.SESSION_SECRET || 'heheboydeptraivocungtan', // Nên dùng biến môi trường
+  //   resave: false,
+  //   saveUninitialized: false,
+  //   cookie: { 
+  //     secure: process.env.NODE_ENV === 'production', // true nếu production (HTTPS)
+  //     maxAge: 24 * 60 * 60 * 1000, // 24 giờ
+  //     httpOnly: true
+  //   }
+  // }));
 
   // Cho phép truy cập ảnh trong thư mục uploads/
   app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
@@ -85,7 +86,7 @@ const initWebRoutes = (app)=>{
     router.get('/',  homeController.getHomePage)
     router.get('/home', (req,res)=>{
       // Ví dụ sử dụng session
-      req.session.views = (req.session.views || 0) + 1;
+      //req.session.views = (req.session.views || 0) + 1;
       // Ví dụ sử dụng cookie
       res.cookie('last_visit', new Date().toISOString(), { 
         maxAge: 900000, 
@@ -107,7 +108,7 @@ const initWebRoutes = (app)=>{
     router.post(`/login`, 
       (req,res)=>{
       // Ví dụ sử dụng session
-      req.session.views = (req.session.views || 0) + 1;
+      //req.session.views = (req.session.views || 0) + 1;
       // Ví dụ sử dụng cookie
       res.cookie('last_visit', new Date().toISOString(), { 
         maxAge: 900000, 

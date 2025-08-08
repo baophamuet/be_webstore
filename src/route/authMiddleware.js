@@ -7,9 +7,10 @@ export function authMiddleware(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
     req.user = decoded; // ⚠️ Gắn vào đây để dùng tiếp
     next(); // đi tiếp
   } catch (err) {
-    return res.status(401).json({ message: "Token không hợp lệ" });
+    return res.status(401).json({ message: "Phiên đăng nhập hết hạn/Token không hợp lệ" });
   }
 }

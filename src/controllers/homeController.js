@@ -63,20 +63,27 @@ let postUser = async(req,res) =>{
 
 // login user
 let loginUser=async(req,res) =>{
+    console.log(">>> cookie:  ",req.cookies)
     let status=await CRUDService.login(req.body) 
     if (status) {
          // Tạo session lưu user
-        req.session.user = {
+        // req.session.user = {
+        //     id: status.id,
+        //     username: status.username,
+        //     role: status.role,
+        // }; 
+        req.cookies.user= {
             id: status.id,
             username: status.username,
             role: status.role,
-        };
+        }; 
+
         const token = jwt.sign(
-            req.session.user,
+            req.cookies.user,
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN }
         );
-        console.log(">> check userSession: ",req.session.user)
+        console.log(">> check userSession: ",req.cookies.user)
 
           // 👉 Set cookie chứa token
         res.cookie("token", token, {
@@ -132,7 +139,7 @@ let allProduct = async(req,res) =>{
     let Products = await CRUDService.allProducts(req.body)   
 
     return  res.json({status:"true", data: Products,
-            views: req.session.views,  // nếu muốn kiểm tra thêm
+           // views: req.session.views,  // nếu muốn kiểm tra thêm session
             lastVisit: req.cookies.last_visit // nếu muốn trả về cookie
         //message:"Thông tin tất cả sản phẩm! ", 
     })
