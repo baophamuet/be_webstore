@@ -95,8 +95,11 @@ const initWebRoutes = (app)=>{
         return  res.json({status:true, message:"Đây là trang chủ", boss:"bao.phamthe đz 10 điểm thôi nhé",})
     })
     // cấu hình thêm/lấy/sửa/ xóa user
-    router.get('/users', homeController.allUsers)
-    router.get(`/users/:id`,homeController.getUser)
+    router.get('/users',authMiddleware, homeController.allUsers)
+    router.get(`/users/:id`,
+      authMiddleware,
+      
+      homeController.getUser)
 
     router.post(`/user`,upload.single('profile_avt'),
    
@@ -113,28 +116,15 @@ const initWebRoutes = (app)=>{
 
       homeController.loginUser(req,res)
     })
-    router.delete(`/deluser`, homeController.delUser)
-    router.put('/user', upload.single('profile_avt'),homeController.updateUser)
+    router.delete(`/deluser`,authMiddleware, homeController.delUser)
+    router.put('/user', 
+      authMiddleware,
+      upload.single('profile_avt'),
+      homeController.updateUser)
 
     // cấu hình thêm/lấy/sửa/ xóa sản phẩm
     router.get(`/product`,homeController.Product)
-    router.get(`/products`,authMiddleware,
-      (req,res)=>{
-
-        if (req.user.role !== "admin") {
-        return res.status(403).json({ message: "Không có quyền truy cập" });
-      }
-
-      // Ví dụ sử dụng session
-      req.session.views = (req.session.views || 0) + 1;
-      // Ví dụ sử dụng cookie
-      res.cookie('last_visit', new Date().toISOString(), { 
-        maxAge: 900000, 
-        httpOnly: true 
-      });
-      // GỌI controller
-      return homeController.allProduct(req, res);
-    })
+    router.get(`/products`,homeController.allProduct)
     router.post(`/product`,homeController.addProduct)
     router.put(`/product`,homeController.updateProduct)
     router.delete(`/product`,homeController.delProduct)

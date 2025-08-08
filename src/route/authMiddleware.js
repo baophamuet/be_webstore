@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 export function authMiddleware(req, res, next) {
   const token = req.cookies.token;
 
-  if (!token) return res.status(401).json({ message: "Chưa đăng nhập" });
+  if (!token) return res.status(401).json({ message: "Chưa đăng nhập",token: req.cookies.token});
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

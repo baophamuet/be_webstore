@@ -20,7 +20,10 @@ let getHomePage = async (req,res) =>{
 /// Lấy thông tin 1 user khi truyền vào từ link
 let getUser = async(req,res) =>{
      //lấy ra id khi truyền vào từ req 
-    let id = req.url.replace('/users/','')
+    let id = Number(req.url.replace('/users/',''))
+    
+    if ((req.user.role ==="admin")||(req.user.id ===id)) {
+
 
     let user = await CRUDService.getUser(id)  
 
@@ -28,12 +31,17 @@ let getUser = async(req,res) =>{
     return  res.json({status:"true", data: user
     
         //message:"Thông tin tất cả sản phẩm! ", 
-    })
+        })
+    }
+    else return res.json({status:false, data: {message:`Bạn không có quyền truy xuất thông tin người khác! vì id của url là ${id}`, user: req.user}})
+
 
 }
 
 // lấy thông tin danh sách user
 let allUsers = async(req,res) =>{
+        if (req.user.role !=="admin") return res.json({status:false, data:"Bạn không có quyền quản trị!"})
+
      let Users = await CRUDService.allUsers(req.body)   
 
     return  res.json({status:"true", data: Users
@@ -89,13 +97,15 @@ let loginUser=async(req,res) =>{
 
 /// xóa user
 let delUser = async(req,res) =>{
+    if (req.user.role!=="admin") return res.json({status:false, message:"Bạn không có quyền tác động!!!", })
      let status = await CRUDService.deleteUser(req.body)   
-      return  res.json({status, message:"Đây là trang delete User nhé!!!", })
+      return  res.json({status, message:`Xóa user ${req.body.username} !!! `})
 }
 
 // cập nhật thông tin user
 let updateUser= async(req,res) =>{
-
+    console.log('📦 req.body:', req.body); // các trường như name, email
+    console.log('📎 req.file:', req.file); // file avatar
     // Gắn đường dẫn ảnh vào req.body
      req.body.pathAvatar = req.file ? `/uploads/images/avatar/${req.file.filename}`: null;
 

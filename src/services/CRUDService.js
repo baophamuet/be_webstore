@@ -9,6 +9,7 @@ const salt = bcrypt.genSaltSync(10)
 
 
 let getUser = async(id) => {
+    
     let User = await db.Users.findOne({where: {id: id,},
         attributes:{exclude:['password','updated_at',]},                         
     })
