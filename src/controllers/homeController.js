@@ -126,7 +126,9 @@ let updateUser= async(req,res) =>{
 //lấy hông tin sản phẩm cụ thể
 
 let Product = async(req,res) =>{
-    let Product = await CRUDService.Product(req.body)   
+    let id = Number(req.url.replace('/products/',''))
+    console.log("Check id product >>>>:", id)
+   let Product = await CRUDService.Product(id)   
 
     return  res.json({status:"true", data: Product
     
@@ -147,6 +149,8 @@ let allProduct = async(req,res) =>{
 
 // thêm sản phẩm
 let addProduct = async(req,res) =>{
+    if (req.user.role!=="admin") return res.json({status:false, message:"Bạn không có quyền tác động!!!", })
+
     let status = await CRUDService.addProduct(req.body)   
     console.log("Check status >>>>  : ",status)
     return  res.json({status, 
@@ -155,7 +159,10 @@ let addProduct = async(req,res) =>{
     })
 }
 let updateProduct= async(req,res) =>{
-    let status = await CRUDService.updateProduct(req.body)   
+    let id = Number(req.url.replace('/products/',''))
+
+    if (req.user.role!=="admin") return res.json({status:false, message:"Bạn không có quyền tác động!!!", })
+    let status = await CRUDService.updateProduct(req.body,id)   
     console.log("Check status >>>>  : ",status)
     return  res.json({status, 
     
@@ -163,7 +170,10 @@ let updateProduct= async(req,res) =>{
     })
 }
 let delProduct= async(req,res) =>{
-    let status = await CRUDService.delProduct(req.body)   
+    let id = Number(req.url.replace('/products/',''))
+
+    if (req.user.role!=="admin") return res.json({status:false, message:"Bạn không có quyền tác động!!!", })
+    let status = await CRUDService.delProduct(id)   
     console.log("Check status >>>>  : ",status)
     return  res.json({status, 
     

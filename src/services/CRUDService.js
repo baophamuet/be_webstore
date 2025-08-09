@@ -192,16 +192,17 @@ let hashUserPassword= (password) => {
         }
     })
 }
-let Product = async(product) =>{
-    let productcheck = await checkproduct(product)
-    let message
-    //kiểm tra tồn tại product này chưa 
-    if (productcheck) {
-          
-        return  productcheck
+let Product = async(ProductId) =>{
+    
+    let product = await db.products.findOne({where: {id: ProductId,},
+        attributes:{exclude:['password','updated_at',]},                         
+    })
+    if (product) {
+        console.log("Check product >>>>  : ",product)
+        return product
     }
     else {
-        let message = `Không có thông tin về sản phẩm ${product.name}`
+        let message = `Không tồn tại sản phẩm người dùng trên hệ thống!`
         return message
     }
 }
@@ -213,16 +214,12 @@ let allProducts = async(products) =>{
         return message
     }
 }
-let addProduct = async(product) =>{
-    // let checkproduct = await db.products.findOne({
-    //     where: {name: product.name},
-    //     raw: true
-    // })
-    // console.log("Check checkproduct >>>>  : ",checkproduct)
+let addProduct = async(ProductId) =>{
 
-    //console.log("Check checkproduct(product) >>>>  : ",await checkproduct(product))
-    //kiểm tra tồn tại product này chưa 
-    if (await checkproduct(product)) return false
+    let product = await checkproduct(ProductId)
+
+
+    if (await checkproduct(ProductId)) return false
     await db.products.create({
         name: product.name,
         category_id: product.category_id,
@@ -235,9 +232,10 @@ let addProduct = async(product) =>{
     return true
 
 }
-let updateProduct = async(product) => {
-    let productUpdate = await checkproduct(product)
-    //console.log("Check productUpdate >>>>: ",productUpdate)
+let updateProduct = async(product,id) => {
+
+    let productUpdate = await checkproduct(id)
+    console.log("Check productUpdate >>>>: ",productUpdate)
     //kiểm tra tồn tại product này chưa 
     if (productUpdate)
     {
@@ -251,18 +249,18 @@ let updateProduct = async(product) => {
         "updated_at": new Date(),
 
         },{
-             where: { name: product.name }
+             where: { id: id }
         }
     )
     let datenow=new Date()
         console.log("datetime: ",datenow )
-        return true
+        return productUpdate
 
     }
     else return false
 }
-let delProduct = async(product) => {
-    let productUpdate = await checkproduct(product)
+let delProduct = async(ProductId) => {
+    let productUpdate = await checkproduct(ProductId)
 
     //kiểm tra tồn tại product này chưa 
     if (productUpdate)
@@ -277,9 +275,9 @@ let delProduct = async(product) => {
     else return false
 }
 
-let checkproduct = async(product) => {
+let checkproduct = async(ProductId) => {
     let productquery = await db.products.findOne({
-    where: { name: product.name},
+    where: { id: ProductId},
     raw:true,
     })
     console.log("Check productquery >>>>: ",productquery)

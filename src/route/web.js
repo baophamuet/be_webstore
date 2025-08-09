@@ -124,11 +124,11 @@ const initWebRoutes = (app)=>{
       homeController.updateUser)
 
     // cấu hình thêm/lấy/sửa/ xóa sản phẩm
-    router.get(`/product`,homeController.Product)
+    router.get(`/products/:id` ,homeController.Product)
     router.get(`/products`,homeController.allProduct)
-    router.post(`/product`,homeController.addProduct)
-    router.put(`/product`,homeController.updateProduct)
-    router.delete(`/product`,homeController.delProduct)
+    router.post(`/product`,authMiddleware,homeController.addProduct)
+    router.put(`/products/:id`,authMiddleware,homeController.updateProduct)
+    router.delete(`/products/:id`,authMiddleware,homeController.delProduct)
 
     // cấu hình lấy sản phẩm theo user truyền vào từ req.body
     router.get('/orders',  homeController.getOrder)
