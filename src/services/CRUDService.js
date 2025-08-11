@@ -109,7 +109,13 @@ let login = async(user) => {
         return false}
     else if (await bcrypt.compare(user.password, userlogin.password)) {
         console.log(">>>>> case 2")
-        return {data: true, username:userlogin.username, role:userlogin.role, id: userlogin.id}}
+        return {data: true,
+            username:userlogin.username, 
+            role:userlogin.role, 
+            id: userlogin.id,
+            favoriteProducts: userlogin.favoriteProducts,
+            cartProducts: userlogin.cartProducts,
+            }}
     else return false
 }
 
@@ -192,6 +198,191 @@ let hashUserPassword= (password) => {
         }
     })
 }
+const addFavoriteProduct = async (userId, productId) => {
+  const User = await db.Users.findOne({ where: { id: userId } });
+  if (!User) return { status: false, message: "Người dùng không tồn tại!" };
+
+  
+  let favorites = User.favoriteProducts;
+  if (!favorites) favorites = [];
+  console.log("Check favorites before adding: ", favorites);
+  // Nếu favorites là chuỗi JSON (ví dụ: "[1, 2, 3]"), parse thành mảng
+  if (typeof favorites === 'string') {
+    try {
+      favorites = JSON.parse(favorites);
+    } catch (e) {
+      favorites = []; // Nếu parse lỗi, gán thành mảng rỗng
+    }
+  }
+
+  console.log("Check productId to add: ", productId);
+  if (favorites.includes(productId)) {
+    return { status: false, message: "Sản phẩm đã có trong danh sách yêu thích!" };
+    } else favorites.push(productId);
+console.log("Check favorites after adding: ", favorites);
+
+  await db.Users.update(
+    { favoriteProducts: favorites, 
+        updated_at: new Date() },
+    { where: { id: userId } }
+  );
+
+  return { status: true, favorites };
+};
+
+// View sản phẩm ưa thích
+// Lấy danh sách sản phẩm ưa thích của người dùng
+const viewFavoriteProduct = async (userId) => {
+    const User = await db.Users.findOne({ where: { id: userId } });   
+    if (!User) return { status: false, message: "Người dùng không tồn tại!" };
+     
+    console.log("Check User favoriteProducts: ", User.favoriteProducts);
+    let favoriteIds = [];
+    if (!User.favoriteProducts) favoriteIds = [];
+    if (Array.isArray(User.favoriteProducts)) {
+        favoriteIds = User.favoriteProducts.map(Number);
+} else if (typeof User.favoriteProducts === 'string') {
+    try {
+        favoriteIds = JSON.parse(User.favoriteProducts).map(Number);
+    } catch (e) {
+        console.error("Lỗi parse favoriteProducts:", e);
+    }
+}
+
+    console.log("Check favoriteIds: ", favoriteIds);
+    const favoriteProducts = await db.products.findAll({
+    where: {
+        id: favoriteIds // WHERE id IN (1, 2, 3)
+    },
+    })
+    if (!favoriteProducts) return { status: false, message: "Không có sản phẩm yêu thích!" };
+    console.log("Check favoriteProducts: ", favoriteProducts);
+    return { status: true, data: favoriteProducts ,user: User };
+}
+
+// Xóa sản phẩm khỏi danh sách yêu thích
+const deFavoriteProduct = async (userId, productId) => {    
+
+    const User = await db.Users.findOne({ where: { id: userId } }); 
+    if (!User) return { status: false, message: "Người dùng không tồn tại!" };
+    let favorites = User.favoriteProducts;
+    if (!favorites) favorites = [];
+    console.log("Check favorites before removing: ", favorites);
+    // Nếu favorites là chuỗi JSON (ví dụ: "[1, 2, 3]"), parse thành mảng
+    if (typeof favorites === 'string') {
+        try {
+            favorites = JSON.parse(favorites);
+        } catch (e) {
+            favorites = []; // Nếu parse lỗi, gán thành mảng rỗng
+        }
+        }   
+    console.log("Check productId to remove: ", productId);
+    const index = favorites.indexOf(productId);
+    if (index === -1) {
+        return { status: false, message: "Sản phẩm không có trong danh sách yêu thích!" };
+    }
+    favorites.splice(index, 1);
+    console.log("Check favorites after removing: ", favorites);
+    await db.Users.update(
+        { favoriteProducts: favorites, 
+            updated_at: new Date() },
+        { where: { id: userId } }
+    );
+    return { status: true, favorites };
+};
+
+const addCartProduct = async (userId, productId) => {
+  const User = await db.Users.findOne({ where: { id: userId } });
+  if (!User) return { status: false, message: "Người dùng không tồn tại!" };
+
+  
+  let cart = User.cartProducts;
+  if (!cart) cart = [];
+  console.log("Check cart before adding: ", cart);
+  // Nếu Cart là chuỗi JSON (ví dụ: "[1, 2, 3]"), parse thành mảng
+  if (typeof cart === 'string') {
+    try {
+      cart = JSON.parse(cart);
+    } catch (e) {
+      cart = []; // Nếu parse lỗi, gán thành mảng rỗng
+    }
+  }
+
+  console.log("Check productId to add: ", productId);
+  if (cart.includes(productId)) {
+    return { status: false, message: "Sản phẩm đã có trong danh sách yêu thích!" };
+    } else cart.push(productId);
+console.log("Check cart after adding: ", cart);
+
+  await db.Users.update(
+    { cartProducts: cart, 
+        updated_at: new Date() },
+    { where: { id: userId } }
+  );
+
+  return { status: true, cart };
+};
+
+const viewCartProduct = async (userId) => {
+    const User = await db.Users.findOne({ where: { id: userId } });   
+    if (!User) return { status: false, message: "Người dùng không tồn tại!" };
+     
+    console.log("Check User cartProducts: ", User.cartProducts);
+    let Cart = [];
+    if (!User.cartProducts) Cart = [];
+    if (Array.isArray(User.cartProducts)) {
+        Cart = User.cartProducts.map(Number);
+    } else if (typeof User.cartProducts === 'string') {
+    try {
+        Cart = JSON.parse(User.cartProducts).map(Number);
+    } catch (e) {
+        console.error("Lỗi parse cartProducts:", e);
+    }
+    }
+
+    console.log("Check Cart: ", Cart);
+    const cartProducts = await db.products.findAll({
+    where: {
+        id: Cart // WHERE id IN (1, 2, 3)
+    },
+    })
+    if (!cartProducts) return { status: false, message: "Không có sản phẩm yêu thích!" };
+    console.log("Check cartProducts: ", cartProducts);
+    return { status: true, data: cartProducts, user: User };
+}
+
+// Xóa sản phẩm khỏi giỏ hàng
+const deCartProduct = async (userId, productId) => {
+
+    const User = await db.Users.findOne({ where: { id: userId } }); 
+    if (!User) return { status: false, message: "Người dùng không tồn tại!" };
+    let Cart = User.cartProducts;
+    if (!Cart) Cart = [];
+    console.log("Check Cart before removing: ", Cart);
+    // Nếu Cart là chuỗi JSON (ví dụ: "[1, 2, 3]"), parse thành mảng
+    if (typeof Cart === 'string') {
+        try {
+            Cart = JSON.parse(Cart);
+        } catch (e) {
+            Cart = []; // Nếu parse lỗi, gán thành mảng rỗng
+        }
+        }   
+    console.log("Check productId to remove: ", productId);
+    const index = Cart.indexOf(productId);
+    if (index === -1) {
+        return { status: false, message: "Sản phẩm không có trong giỏ hàng!" };
+    }
+    Cart.splice(index, 1);
+    console.log("Check Cart after removing: ", Cart);
+    await db.Users.update(
+        { cartProducts: Cart, 
+            updated_at: new Date() },
+        { where: { id: userId } }
+    );
+    return { status: true, Cart };
+};
+
+
 let Product = async(ProductId) =>{
     
     let product = await db.products.findOne({where: {id: ProductId,},
@@ -346,5 +537,10 @@ export default {
     addProduct,
     updateProduct,
     delProduct,
-
+    addFavoriteProduct,
+    addCartProduct,
+    viewCartProduct,
+    viewFavoriteProduct,
+    deFavoriteProduct,
+    deCartProduct,
 }

@@ -123,6 +123,16 @@ const initWebRoutes = (app)=>{
       upload.single('profile_avt'),
       homeController.updateUser)
 
+      // API thêm sản phẩm yêu thích/thêm vào giỏ hàng
+    router.post('/users/:id/favorite', authMiddleware, homeController.addFavoriteProduct);
+    router.post('/users/:id/cart', authMiddleware, homeController.addCartProduct);
+    // API View sản phẩm yêu thích/đã thêm vào giỏ hàng
+    router.get('/users/:id/favorite', authMiddleware, homeController.viewFavoriteProduct);
+    router.get('/users/:id/cart', authMiddleware, homeController.viewCartProduct);
+        // API Xóa sản phẩm yêu thích/thêm vào giỏ hàng
+    router.put('/users/:id/favorite', authMiddleware, homeController.deFavoriteProduct);
+    router.put('/users/:id/cart', authMiddleware, homeController.deCartProduct);
+
     // cấu hình thêm/lấy/sửa/ xóa sản phẩm
     router.get(`/products/:id` ,homeController.Product)
     router.get(`/products`,homeController.allProduct)

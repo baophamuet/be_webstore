@@ -76,6 +76,8 @@ let loginUser=async(req,res) =>{
             id: status.id,
             username: status.username,
             role: status.role,
+            favoriteProducts: status.favoriteProducts,
+            cartProducts: status.cartProducts,
         }; 
 
         const token = jwt.sign(
@@ -120,6 +122,46 @@ let updateUser= async(req,res) =>{
      let status = await CRUDService.updateUser(req.body)
    // console.log("Check req.file update user: >>>>:", req.file)    
       return  res.json({status, message:"vừa thực hiện Update User nhé!!!", })
+}
+// thêm sản phẩm ưa thích
+let addFavoriteProduct = async (req, res) => {
+    const userId = req.params.id; // Lấy ID người dùng từ URL
+    console.log("Check req.body >>>>:", req.body.productId)
+    let status = await CRUDService.addFavoriteProduct(userId, req.body.productId);
+    
+    // Gọi service để thêm sản phẩm ưa thích
+    return res.json(status);
+}
+// view sản phẩm ưa thích
+let viewFavoriteProduct = async (req, res) => {
+    const userId = req.params.id; // Lấy ID người dùng từ URL
+    let status = await CRUDService.viewFavoriteProduct(userId); // Gọi service để lấy danh sách sản phẩm ưa thích
+    return res.json(status);
+}
+let deFavoriteProduct = async (req, res) => {
+    const userId = req.params.id; // Lấy ID người dùng từ URL   
+    let status = await CRUDService.deFavoriteProduct(userId, req.body.productId); // Gọi service để lấy danh sách sản phẩm ưa thích
+    return res.json(status);    
+}
+
+let deCartProduct = async (req, res) => {
+    const userId = req.params.id; // Lấy ID người dùng từ URL       
+    let status = await CRUDService.deCartProduct(userId, req.body.productId); // Gọi service để lấy danh sách sản phẩm ưa thích
+    return res.json(status);
+}
+
+// view sản phẩm đã thêm vào giỏ hàng
+let viewCartProduct = async (req, res) => {
+    const userId = req.params.id; // Lấy ID người dùng từ URL
+    let status = await CRUDService.viewCartProduct(userId); // Gọi service để lấy danh sách sản phẩm trong giỏ hàng
+    return res.json(status);
+}   
+
+// thêm sản phẩm vào giỏ hàng
+let addCartProduct = async (req, res) => {
+    const userId = req.params.id; // Lấy ID người dùng từ URL
+    let status = await CRUDService.addCartProduct(userId, req.body.productId); // Gọi service để thêm sản phẩm ưa thích
+    return res.json(status);
 }
 
 
@@ -216,5 +258,12 @@ export default {
     updateProduct,
     delProduct,
     getOrder,
+    addFavoriteProduct,
+    addCartProduct,
+    viewFavoriteProduct,
+    viewCartProduct,
+    deFavoriteProduct,
+    deCartProduct,
+
 }
 

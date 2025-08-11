@@ -21,6 +21,8 @@ export default (sequelize, DataTypes) => {
     role: DataTypes.STRING,
     pathAvatar: DataTypes.STRING,
     created_at: DataTypes.DATE,
+    favoriteProducts : DataTypes.JSON,
+    cartProducts : DataTypes.JSON
 
   }, {
     sequelize,
