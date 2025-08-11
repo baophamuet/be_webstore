@@ -4,6 +4,26 @@ export default {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert('products', 
       [
+      {
+        name: 'iPhone 15 Pro Max',
+        category_id: 4,
+        description: 'Flagship Apple smartphone',
+        price: '1299',
+        stock: 50,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+       {
+        name: 'Samsung Galaxy S24 Ultra',
+        category_id: 4,
+        description: 'High-end Android smartphone',
+        price: '1199',
+        stock: 30,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+
+
       // Áo
       {
         name: 'Áo Thun Nam Cổ Tròn Màu Đen Logo Studio',

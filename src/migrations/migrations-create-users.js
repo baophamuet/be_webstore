@@ -38,6 +38,16 @@ export default {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+      },
+      favoriteProducts: {
+        type: Sequelize.JSON, 
+        defaultValue: [],     // Giá trị mặc định là mảng rỗng
+        allowNull: true       // Cho phép NULL nếu cần
+      },
+      cartProducts: {
+        type: Sequelize.JSON, 
+        defaultValue: [],     // Giá trị mặc định là mảng rỗng
+        allowNull: true       // Cho phép NULL nếu cần
       }
     });
   },
