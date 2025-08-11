@@ -18,6 +18,8 @@ export default {
       role: "user",
       pathAvatar: "",
       created_at: new Date(),
+      favoriteProducts:[],
+      cartProducts: [],
   },
   {
       username: "baophamuet",
@@ -28,6 +30,8 @@ export default {
       role: "admin",
       pathAvatar: "",
       created_at: new Date(),
+      favoriteProducts:[],
+      cartProducts: [],
   },
   {
       username: "heheboy",
@@ -38,6 +42,8 @@ export default {
       role: "user",
       pathAvatar: "",
       created_at: new Date(),
+      favoriteProducts:[],
+      cartProducts: [],
   },
       //   "username": "heheboy",
       // "password": "sdalfkg",
