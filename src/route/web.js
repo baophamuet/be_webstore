@@ -11,6 +11,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import 'dotenv/config'; // <-- Đảm bảo dòng này ở trên cùng để load biến môi trường
 import fs from "fs"; 
 
+
 // Tạo __dirname thủ công vì đang dùng ES Module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -168,17 +169,51 @@ router.post("/combine-image", upload.single("modelFile"), async (req, res) => {
       return res.status(400).json({ success: false, error: "Thiếu outfitUrl" });
     }
 
+    
     // 🔹 Link ảnh model sau khi upload
     const modelUrl = `/uploads/images/user/${modelFile.filename}`;
     console.log("Ảnh người mẫu đã lưu tại:", modelUrl);
 
     // 🔹 Đọc file vừa upload từ server để convert base64
     const modelBase64 = fs.readFileSync(modelFile.path).toString("base64");
+    
+
+    // 🔹 Gọi API Python để tạo mask từ ảnh model
+    console.log("Gọi API generate-mask...");
+
+    const fileBuf = fs.readFileSync(modelFile.path); // multer lưu file
+    const formData = new FormData(); // built-in
+    formData.append("file", new Blob([fileBuf], { type: "image/png" }), modelFile.originalname);
+
+    const maskRes = await fetch("http://localhost:5000/generate-mask", {
+      method: "POST",
+      body: formData,
+    });
+    console.log("Status:", maskRes.status);
+    if (!maskRes.ok) {
+      return res.status(500).json({ success: false, error: "Lỗi khi gọi API generate-mask" });
+    } else {
+
+    const maskData = await maskRes.json();
+    if (!maskData?.mask_base64) {
+      return res.status(500).json({ success: false, error: "Không nhận được mask từ API" });
+    }
+
+    const maskBase64 = maskData.mask_base64;
+
+    
+    // 🔹 Nếu muốn debug → lưu mask ra thư mục uploads/masks
+    const maskFolder = "uploads/masks";
+    if (!fs.existsSync(maskFolder)) fs.mkdirSync(maskFolder, { recursive: true });
+    fs.writeFileSync(path.join(maskFolder, `mask-${Date.now()}.png`), Buffer.from(maskBase64, "base64"));
+
+    // 🔹 Convert outfit sang base64
     const outfitBase64 = await urlToBase64(outfitUrl);
 
-    const finalPrompt =
-      prompt ||
-      "Edit Image 1 by replacing only the clothing area with the clothing from Image 2. Do not change or regenerate the model’s face, hair, skin, accessories, or background in any way. Strictly preserve the exact face, expression, and identifiable features from Image 1 without alteration. Ensure the clothing fits naturally to the body and posture, maintaining original colors, patterns, textures, and folds from Image 2, and matching lighting and shadows to Image 1";
+    //Viết prompt cho mô hình
+    const finalPrompt = process.env.FINAL_PROMPT.replace(/\\n/g, "\n");
+    console.log("check decode prompt:  ",finalPrompt);
+  }
 
     // 🔹 Gọi model AI để ghép ảnh
     const result = await model.generateContent({
@@ -189,6 +224,9 @@ router.post("/combine-image", upload.single("modelFile"), async (req, res) => {
             { text: finalPrompt },
             { inlineData: { mimeType: "image/png", data: modelBase64 } },
             { inlineData: { mimeType: "image/png", data: outfitBase64 } },
+            maskBase64 
+              ? { inlineData: { mimeType: "image/png", data: maskBase64 } } 
+              : null, // nếu không có mask thì sẽ là null
           ],
         },
       ],

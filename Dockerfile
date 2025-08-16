@@ -12,7 +12,8 @@ COPY . .
 
 # Tạo sẵn các thư mục upload ảnh avatar và products
 RUN mkdir -p ./uploads/images/avatar \
-    && mkdir -p ./uploads/products
+    && mkdir -p ./uploads/products \
+    && mkdir -p ./uploads/masks
 
 
 RUN npm run build-src
