@@ -11,9 +11,12 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import 'dotenv/config'; // <-- Đảm bảo dòng này ở trên cùng để load biến môi trường
 import fs from "fs"; 
 
+
 // Tạo __dirname thủ công vì đang dùng ES Module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+//Lấy thông tin service tạo mask
+const SERVICE=process.env.SERVICE;
 
 // Lấy thông tin dự án từ biến môi trường
 //const YOUR_PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT_ID;
@@ -44,12 +47,22 @@ const storage = multer.diskStorage({
       cb(null, 'uploads/images/avatar');
     } else if (req.path.startsWith('/product')) {
       cb(null, 'uploads/images/products');
+    } else if (req.path.startsWith('/combine-image')) {
+      // Ảnh người mẫu khách hàng upload để thử đồ
+      cb(null, 'uploads/images/user');
     }
+    
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + req.body.username + '-' + uniqueSuffix + ext);
+    if (req.path.startsWith('/user-image')) {
+      // Đặt tên riêng cho ảnh user upload
+      cb(null, 'user-' + uniqueSuffix + ext);
+    } else {
+      // Avatar / Product vẫn giữ cách cũ
+      cb(null, file.fieldname + '-' + req.body.username + '-' + uniqueSuffix + ext);
+    }
   }
 });
 
@@ -138,7 +151,7 @@ const initWebRoutes = (app) => {
   // cấu hình thêm/lấy/sửa/ xóa sản phẩm
   router.get(`/products/:id`, homeController.Product);
   router.get(`/products`, homeController.allProduct);
-  router.post(`/product`, authMiddleware, homeController.addProduct);
+  router.post(`/product`, authMiddleware,upload.array('products_images',10), homeController.addProduct);
   router.put(`/products/:id`, authMiddleware, homeController.updateProduct);
   router.delete(`/products/:id`, authMiddleware, homeController.delProduct);
 
@@ -146,23 +159,66 @@ const initWebRoutes = (app) => {
   router.get('/orders', homeController.getOrder);
 
 
-router.post("/combine-image", async (req, res) => {
+// Route combine
+router.post("/combine-image", upload.single("modelFile"), async (req, res) => {
   try {
-    const { modelUrl, outfitUrl, prompt } = req.body;
+    const { outfitUrl, prompt } = req.body;
+    const modelFile = req.file;
 
-    if (!modelUrl || !outfitUrl) {
-      return res.status(400).json({ success: false, error: "Cần gửi đủ modelUrl và outfitUrl" });
+    if (!modelFile) {
+      return res.status(400).json({ success: false, error: "Chưa chọn ảnh người mẫu" });
+    }
+    if (!outfitUrl) {
+      return res.status(400).json({ success: false, error: "Thiếu outfitUrl" });
     }
 
-    // Chuyển URL ảnh sang base64
-    const modelBase64 = await urlToBase64(modelUrl);
+    
+    // 🔹 Link ảnh model sau khi upload
+    const modelUrl = `/uploads/images/user/${modelFile.filename}`;
+    console.log("Ảnh người mẫu đã lưu tại:", modelUrl);
+
+    // 🔹 Đọc file vừa upload từ server để convert base64
+    const modelBase64 = fs.readFileSync(modelFile.path).toString("base64");
+    
+
+    // 🔹 Gọi API Python để tạo mask từ ảnh model
+    console.log("Gọi API generate-mask...");
+
+    const fileBuf = fs.readFileSync(modelFile.path); // multer lưu file
+    const formData = new FormData(); // built-in
+    formData.append("file", new Blob([fileBuf], { type: "image/png" }), modelFile.originalname);
+
+    const maskRes = await fetch(`${SERVICE}/generate-mask`, {
+      method: "POST",
+      body: formData,
+    });
+    console.log("Status:", maskRes.status);
+    if (!maskRes.ok) {
+      return res.status(500).json({ success: false, error: "Lỗi khi gọi API generate-mask" });
+    }
+
+    const maskData = await maskRes.json();
+    if (!maskData?.mask_base64) {
+      return res.status(500).json({ success: false, error: "Không nhận được mask từ API" });
+    }
+
+    const maskBase64 = maskData.mask_base64;
+
+    
+    // 🔹 Nếu muốn debug → lưu mask ra thư mục uploads/masks
+    const maskFolder = "uploads/masks";
+    if (!fs.existsSync(maskFolder)) fs.mkdirSync(maskFolder, { recursive: true });
+    fs.writeFileSync(path.join(maskFolder, `mask-${Date.now()}.png`), Buffer.from(maskBase64, "base64"));
+
+    // 🔹 Convert outfit sang base64
     const outfitBase64 = await urlToBase64(outfitUrl);
 
-    // Prompt từ client hoặc mặc định
-    const finalPrompt =
-      prompt ||
-      "Hãy kết hợp người mẫu từ ảnh 1 và trang phục từ ảnh 2, tạo ảnh người mẫu mặc trang phục tự nhiên và chân thực.";
+    //Viết prompt cho mô hình
+    const finalPrompt = process.env.FINAL_PROMPT.replace(/\\n/g, "\n");
+    console.log("check decode prompt:  ",finalPrompt);
+  
 
+    // 🔹 Gọi model AI để ghép ảnh
     const result = await model.generateContent({
       contents: [
         {
@@ -171,48 +227,45 @@ router.post("/combine-image", async (req, res) => {
             { text: finalPrompt },
             { inlineData: { mimeType: "image/png", data: modelBase64 } },
             { inlineData: { mimeType: "image/png", data: outfitBase64 } },
+            maskBase64 
+              ? { inlineData: { mimeType: "image/png", data: maskBase64 } } 
+              : null, // nếu không có mask thì sẽ là null
           ],
         },
       ],
-      // 🔥 model yêu cầu phải có ["TEXT", "IMAGE"]
       generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
     });
 
-    // Lấy các parts trả về
     const parts = result.response.candidates[0].content.parts;
-
-    // Tìm phần chứa ảnh
     const imagePart = parts.find((p) => p.inlineData);
+
     if (!imagePart) {
       return res.status(500).json({ success: false, error: "Không tìm thấy ảnh trong response" });
     }
 
+    // 🔹 Lưu ảnh kết quả
     const imageBase64 = imagePart.inlineData.data;
     const buffer = Buffer.from(imageBase64, "base64");
 
-    // Lưu file vào thư mục
-    const destFolder = "uploads/images/products";
+    const destFolder = "uploads/images/try-on-photo";
     if (!fs.existsSync(destFolder)) fs.mkdirSync(destFolder, { recursive: true });
 
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const filePath = path.join(destFolder, `combine-${uniqueSuffix}.png`);
+    const filePath = path.join(destFolder, `combine-${Date.now()}.png`);
     fs.writeFileSync(filePath, buffer);
-
-    // Tìm thêm phần text mô tả (nếu có)
-    const textPart = parts.find((p) => p.text);
-
+    console.log("Ảnh kết quả đã được lưu!!");
     res.json({
       success: true,
+      modelUrl, // link ảnh người mẫu đã upload
+      outfitUrl,
+      resultUrl: `/uploads/images/try-on-photo/${path.basename(filePath)}`, // link ảnh kết quả
       prompt: finalPrompt,
-      description: textPart ? textPart.text : null,
-      savedPath: filePath,
-      url: `/uploads/images/products/${path.basename(filePath)}`,
     });
   } catch (error) {
     console.error("Error combining images:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
 // req.body
 // {
 //     "modelUrl": "https://bizweb.dktcdn.net/thumb/1024x1024/100/366/703/products/a03-2.jpg?v=1748323626020",

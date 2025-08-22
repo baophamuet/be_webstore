@@ -2,4 +2,7 @@ node_modules
 .env
 build
 uploads/images
+uploads/masks
 teak-kit-468907-d0-0495a0dbd4c8.json
+webstore-469006-8f46e7aee974.json
+fe-webstore
