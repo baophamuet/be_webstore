@@ -15,6 +15,8 @@ import fs from "fs";
 // Tạo __dirname thủ công vì đang dùng ES Module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+//Lấy thông tin service tạo mask
+const SERVICE=process.env.SERVICE;
 
 // Lấy thông tin dự án từ biến môi trường
 //const YOUR_PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT_ID;
@@ -49,6 +51,7 @@ const storage = multer.diskStorage({
       // Ảnh người mẫu khách hàng upload để thử đồ
       cb(null, 'uploads/images/user');
     }
+    
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -148,7 +151,7 @@ const initWebRoutes = (app) => {
   // cấu hình thêm/lấy/sửa/ xóa sản phẩm
   router.get(`/products/:id`, homeController.Product);
   router.get(`/products`, homeController.allProduct);
-  router.post(`/product`, authMiddleware, homeController.addProduct);
+  router.post(`/product`, authMiddleware,upload.array('products_images',10), homeController.addProduct);
   router.put(`/products/:id`, authMiddleware, homeController.updateProduct);
   router.delete(`/products/:id`, authMiddleware, homeController.delProduct);
 
@@ -185,14 +188,14 @@ router.post("/combine-image", upload.single("modelFile"), async (req, res) => {
     const formData = new FormData(); // built-in
     formData.append("file", new Blob([fileBuf], { type: "image/png" }), modelFile.originalname);
 
-    const maskRes = await fetch("http://localhost:5000/generate-mask", {
+    const maskRes = await fetch(`${SERVICE}/generate-mask`, {
       method: "POST",
       body: formData,
     });
     console.log("Status:", maskRes.status);
     if (!maskRes.ok) {
       return res.status(500).json({ success: false, error: "Lỗi khi gọi API generate-mask" });
-    } else {
+    }
 
     const maskData = await maskRes.json();
     if (!maskData?.mask_base64) {
@@ -213,7 +216,7 @@ router.post("/combine-image", upload.single("modelFile"), async (req, res) => {
     //Viết prompt cho mô hình
     const finalPrompt = process.env.FINAL_PROMPT.replace(/\\n/g, "\n");
     console.log("check decode prompt:  ",finalPrompt);
-  }
+  
 
     // 🔹 Gọi model AI để ghép ảnh
     const result = await model.generateContent({

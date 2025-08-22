@@ -405,18 +405,19 @@ let allProducts = async(products) =>{
         return message
     }
 }
-let addProduct = async(ProductId) =>{
+let addProduct = async(product) =>{
 
-    let product = await checkproduct(ProductId)
+    //let product = await checkproduct(Product)
 
 
-    if (await checkproduct(ProductId)) return false
+    if (await checkproduct(product)) return false
     await db.products.create({
         name: product.name,
         category_id: product.category_id,
         description: product.description,
         price: product.price,
         stock: product.stock,
+        images:product.images,
         created_at: new Date(),
         updated_at: new Date()
     })

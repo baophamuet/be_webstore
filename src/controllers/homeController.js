@@ -4,7 +4,8 @@ import CRUDService from "../services/CRUDService.js"
 import { raw } from 'mysql2';
 import jwt from 'jsonwebtoken';
 
-
+const REACT_APP_API_URL=`http://localhost:8080`
+// const REACT_APP_API_URL=https://baophamuet.site/api
 let getHomePage = async (req,res) =>{
     try {
 
@@ -192,6 +193,15 @@ let allProduct = async(req,res) =>{
 // thêm sản phẩm
 let addProduct = async(req,res) =>{
     if (req.user.role!=="admin") return res.json({status:false, message:"Bạn không có quyền tác động!!!", })
+    // Gắn đường dẫn ảnh vào req.body
+    console.log("Check file new product:      ",req.files)
+    req.body.images=[]
+    if (req.files.length>0) {
+    for (let i=0;i<req.files.length;i++){
+        req.body.images[i]=`${REACT_APP_API_URL}/uploads/images/products/${req.files[i].filename}`
+    }
+    console.log("Check images new product:      ",req.body.images)    
+    }
 
     let status = await CRUDService.addProduct(req.body)   
     console.log("Check status >>>>  : ",status)
