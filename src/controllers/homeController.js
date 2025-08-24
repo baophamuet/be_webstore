@@ -180,8 +180,8 @@ let Product = async(req,res) =>{
 }
 
 // lấy thông tin tất cả sản phẩm
-let allProduct = async(req,res) =>{
-    let Products = await CRUDService.allProducts(req.body)   
+let allProducts = async(req,res) =>{
+    let Products = await CRUDService.allProducts()   
 
     return  res.json({status:"true", data: Products,
            // views: req.session.views,  // nếu muốn kiểm tra thêm session
@@ -189,7 +189,20 @@ let allProduct = async(req,res) =>{
         //message:"Thông tin tất cả sản phẩm! ", 
     })
 }
+// lấy thông tin tất cả sản phẩm
+let searchProducts = async(req,res,next) =>{
 
+    let Products = req.body.keyword 
+                    ? await CRUDService.searchProducts(req.body)   
+                    : null
+    if (Products==null) return res.json({status:"false", data: Products,})
+
+    return  res.json({status:"true", data: Products,
+           // views: req.session.views,  // nếu muốn kiểm tra thêm session
+            lastVisit: req.cookies.last_visit // nếu muốn trả về cookie
+        //message:"Thông tin tất cả sản phẩm! ", 
+    })
+}
 // thêm sản phẩm
 let addProduct = async(req,res) =>{
     if (req.user.role!=="admin") return res.json({status:false, message:"Bạn không có quyền tác động!!!", })
@@ -273,7 +286,7 @@ export default {
     loginUser,
     updateUser,
     Product,
-    allProduct,
+    allProducts,
     addProduct,
     updateProduct,
     delProduct,
@@ -284,6 +297,7 @@ export default {
     viewCartProduct,
     deFavoriteProduct,
     deCartProduct,
+    searchProducts,
 
 }
 

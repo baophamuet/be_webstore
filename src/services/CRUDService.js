@@ -1,5 +1,5 @@
 import { raw } from 'mysql2'
-import { Op, where } from 'sequelize';
+import { Op,Sequelize, where } from 'sequelize';
 import db from '../models/index.js'
 import bcrypt from 'bcryptjs'
 
@@ -397,11 +397,34 @@ let Product = async(ProductId) =>{
         return message
     }
 }
-let allProducts = async(products) =>{
+let allProducts = async() =>{
     let Products = await db.products.findAll({raw:true})
     if (Products)    return Products
     else {
-        let message = `Chưa có sản phẩm nào được thêm`
+        let message = `Chưa có sản phẩm nào!`
+        return message
+    }
+}
+
+let searchProducts = async(req) =>{
+    console.log("Check keyword search: ",req.keyword)
+    let Products = await db.products.findAll(
+        {
+  where: {
+    [Op.or]: [
+      Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("name")), {
+        [Op.like]: `%${req.keyword.toLowerCase()}%`
+      }),
+      Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("description")), {
+        [Op.like]: `%${req.keyword.toLowerCase()}%`
+      })
+    ]
+  },
+        }
+    )
+    if (Products)    return Products
+    else {
+        let message = `Chưa có sản phẩm!`
         return message
     }
 }
@@ -545,4 +568,5 @@ export default {
     viewFavoriteProduct,
     deFavoriteProduct,
     deCartProduct,
+    searchProducts,
 }
