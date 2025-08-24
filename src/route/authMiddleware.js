@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 export function authMiddleware(req, res, next) {
   const token = req.cookies.token;
 
-  if (!token) return res.status(401).json({ message: "Chưa đăng nhập",token: req.cookies.token});
+  if (!token) return res.status(401).json({status:false, message: "Chưa đăng nhập",token: req.cookies.token});
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -11,6 +11,6 @@ export function authMiddleware(req, res, next) {
     req.user = decoded; // ⚠️ Gắn vào đây để dùng tiếp
     next(); // đi tiếp
   } catch (err) {
-    return res.status(401).json({ message: "Phiên đăng nhập hết hạn/Token không hợp lệ" });
+    return res.status(401).json({status:false, message: "Phiên đăng nhập hết hạn/Token không hợp lệ" });
   }
 }

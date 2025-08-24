@@ -433,12 +433,13 @@ let updateProduct = async(product,id) => {
     {
         await db.products.update(
         {
-        "name": product.name,
-        "category_id": product.category_id,
-        "description": product.description,
-        "price": product.price,
-        "stock": product.stock,
-        "updated_at": new Date(),
+        name: product.name,
+        category_id: product.category_id,
+        description: product.description,
+        price: product.price,
+        stock: product.stock,
+        images:product.images,
+        updated_at: new Date(),
 
         },{
              where: { id: id }

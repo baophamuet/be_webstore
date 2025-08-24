@@ -10,6 +10,7 @@ import { authMiddleware } from './authMiddleware.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import 'dotenv/config'; // <-- Đảm bảo dòng này ở trên cùng để load biến môi trường
 import fs from "fs"; 
+import jwt from "jsonwebtoken";
 
 
 // Tạo __dirname thủ công vì đang dùng ES Module
@@ -123,6 +124,22 @@ const initWebRoutes = (app) => {
     });
     return res.json({ status: true, message: "Đây là trang chủ", boss: "bao.phamthe đz 10 điểm thôi nhé" });
   });
+  //  check token còn hiệu lực
+  router.get('/checkauthenticator', (req,res)=>{
+      const token = req.cookies.token;
+      console.log("check token author:  ",token)
+      if (!token) return res.json({status:false, message: "Chưa đăng nhập",token: req.cookies.token})
+      try {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          
+          req.user = decoded; // ⚠️ Gắn vào đây để dùng tiếp
+          return res.json({status:true, message: "Check authenticator OK "})
+        } catch (err) {
+          return res.json({status:false, message: "Phiên đăng nhập hết hạn/Token không hợp lệ" });
+        }  
+        
+  });
+
 
   // cấu hình thêm/lấy/sửa/ xóa user
   router.get('/users', authMiddleware, homeController.allUsers);
@@ -135,6 +152,15 @@ const initWebRoutes = (app) => {
     });
     homeController.loginUser(req, res);
   });
+  router.post(`/logout`, (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: true,     // nếu https
+    sameSite: 'none', // nếu khác origin
+    path: '/'
+  });
+  res.json({ status: true, message: 'Đã đăng xuất' });
+});
   router.delete(`/deluser`, authMiddleware, homeController.delUser);
   router.put('/user', authMiddleware, upload.single('profile_avt'), homeController.updateUser);
 
@@ -152,7 +178,7 @@ const initWebRoutes = (app) => {
   router.get(`/products/:id`, homeController.Product);
   router.get(`/products`, homeController.allProduct);
   router.post(`/product`, authMiddleware,upload.array('products_images',10), homeController.addProduct);
-  router.put(`/products/:id`, authMiddleware, homeController.updateProduct);
+  router.put(`/products/:id`, authMiddleware,upload.array('products_images',10), homeController.updateProduct);
   router.delete(`/products/:id`, authMiddleware, homeController.delProduct);
 
   // cấu hình lấy sản phẩm theo user truyền vào từ req.body
