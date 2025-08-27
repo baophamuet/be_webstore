@@ -36,5 +36,8 @@
     "@babel/cli": "^7.28.0",
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.28.0"
+  },
+  "overrides": {
+    "onnxruntime-node": "1.21.0"
   }
 }
