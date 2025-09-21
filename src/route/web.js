@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import homeController from '../controllers/homeController.js';
 import multer from 'multer';
 import path from "path";
@@ -212,7 +212,7 @@ router.post("/combine-image", upload.single("modelFile"), async (req, res) => {
     // 🔹 Gọi API Python để tạo mask từ ảnh model
     console.log("Gọi API generate-mask...");
 
-    const fileBuf = fs.readFileSync(modelFile.path); // multer lưu file
+    const fileBuf = fs.readFileSync(modelFile.path); // multer lưu file 
     const formData = new FormData(); // built-in
     formData.append("file", new Blob([fileBuf], { type: "image/png" }), modelFile.originalname);
 
@@ -236,7 +236,7 @@ router.post("/combine-image", upload.single("modelFile"), async (req, res) => {
     // 🔹 Nếu muốn debug → lưu mask ra thư mục uploads/masks
     const maskFolder = "uploads/masks";
     if (!fs.existsSync(maskFolder)) fs.mkdirSync(maskFolder, { recursive: true });
-    fs.writeFileSync(path.join(maskFolder, `mask-${Date.now()}.png`), Buffer.from(maskBase64, "base64"));
+    fs.writeFileSync(path.join(maskFolder, `mask-${Date.now()}.png`), Buffer.from(maskData.mask_base64, "base64"));
 
     // 🔹 Convert outfit sang base64
     const outfitBase64 = await urlToBase64(outfitUrl);
@@ -301,7 +301,25 @@ router.post("/combine-image", upload.single("modelFile"), async (req, res) => {
 //     "prompt": "Hãy ghép người mẫu mặc bộ váy này, giữ gương mặt rõ nét."
 // }
 
+// Route tải ảnh kết quả try-on
+  router.get("/download/tryon/:filename", (req, res) => {
+  const filename = req.params.filename;
+  console.log("Request tải ảnh:", filename);
 
+  // Chặn path traversal
+  if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
+    return res.status(400).send("Invalid filename");
+  }
+
+  const filePath = path.join(__dirname, "../../uploads/images/try-on-photo", filename);
+  console.log("Full path:", filePath);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send("Not found");
+  }
+
+  // Ép tải xuống
+  res.download(filePath, filename); // tự set Content-Disposition: attachment
+})
   return app.use("/", router);
 };
 
