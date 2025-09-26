@@ -259,8 +259,8 @@ let delProduct= async(req,res) =>{
 // lấy thông tin các đơn hàng của user được truyền vào từ req.body
 
 let getOrder = async (req,res) =>{
-    let user =req.body
-    let status = await CRUDService.displayOrder(user)
+    const userId = req.params.id;
+    let status = await CRUDService.displayOrder(userId)
     return res.json({status})
     // return new Promise(async (resolve,reject) =>{
     //       try {
@@ -275,6 +275,12 @@ let getOrder = async (req,res) =>{
     //     console.log(e)
     // }
     // })
+}
+let getOrderDetail = async (req,res) =>{
+    const userId = req.params.user_id;
+    const orderId = req.params.id;  
+    let status = await CRUDService.displayOneOrder(userId,orderId)
+    return res.json({status})
 }
 
 export default {
@@ -291,6 +297,7 @@ export default {
     updateProduct,
     delProduct,
     getOrder,
+    getOrderDetail,
     addFavoriteProduct,
     addCartProduct,
     viewFavoriteProduct,

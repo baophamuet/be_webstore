@@ -20,6 +20,10 @@ export default {
       status: {
           type: Sequelize.ENUM('pending', 'shipped', 'delivered', 'cancelled')
       },
+      payment: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,

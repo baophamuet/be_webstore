@@ -183,8 +183,9 @@ const initWebRoutes = (app) => {
 
   // cấu hình lấy sản phẩm theo search
   router.post(`/search`, homeController.searchProducts);
-  // cấu hình lấy sản phẩm theo user truyền vào từ req.body
-  router.get('/orders', homeController.getOrder);
+  // cấu hình lấy sản phẩm theo user_id truyền vào từ url
+  router.get('/users/:id/orders', homeController.getOrder);
+  router.get('/users/:user_id/orders/:id', homeController.getOrderDetail);
 
 
 // Route combine

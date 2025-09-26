@@ -30,6 +30,7 @@ export default (sequelize, DataTypes) => {
     user_id: DataTypes.INTEGER,
     total_price: DataTypes.STRING,
     status: DataTypes.STRING,
+    payment: DataTypes.BOOLEAN,
     created_at: DataTypes.DATE
   }, {
     sequelize,

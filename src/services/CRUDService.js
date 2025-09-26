@@ -10,7 +10,7 @@ const salt = bcrypt.genSaltSync(10)
 
 let getUser = async(id) => {
     
-    let User = await db.Users.findOne({where: {id: id,},
+    let User = await db.users.findOne({where: {id: id,},
         attributes:{exclude:['password','updated_at',]},                         
     })
     if (User) return User
@@ -21,7 +21,7 @@ let getUser = async(id) => {
 
 }
 let allUsers = async() => {
-    let Users = await db.Users.findAll({where: {role: 'user' },raw:true,
+    let Users = await db.users.findAll({where: {role: 'user' },raw:true,
         attributes:{exclude:['password','updated_at',]},
     })
     if (Users) return {Count:Users.length, Users}
@@ -31,7 +31,7 @@ let allUsers = async() => {
     }
 }
 let createUser = async(user,file) => {
-    let checkuser = await db.Users.findOne(
+    let checkuser = await db.users.findOne(
         {
             where:{username: user.username,},
             raw: true,
@@ -47,7 +47,7 @@ let createUser = async(user,file) => {
         try {
                let hashUserPasswordFromBcrypt = await hashUserPassword(user.password)
                 // let test= hashUserPassword(user.pass)
-                await db.Users.create({
+                await db.users.create({
                     username: user.username,
                     password: hashUserPasswordFromBcrypt ,
                     email: user.email,
@@ -72,7 +72,7 @@ console.log("xóa username này :    ", user.username)
     return new Promise (async(resolve,reject)=>{
         try {
                 // let test= hashUserPassword(user.pass)
-               let deletedCount =  await db.Users.destroy({
+               let deletedCount =  await db.users.destroy({
                     where: {
                         [Op.or]: [
                             { username: user.username },
@@ -97,7 +97,7 @@ console.log("xóa username này :    ", user.username)
 }
 let login = async(user) => {
     
-    let userlogin = await db.Users.findOne(
+    let userlogin = await db.users.findOne(
         {
         where:{username: user.username,},
         raw: true
@@ -122,14 +122,14 @@ let login = async(user) => {
 let updateUser =  async(user) => {
     let hashUserPasswordFromBcrypt = await hashUserPassword(user.newPassword)
     
-    let userDB = await db.Users.findOne(
+    let userDB = await db.users.findOne(
         {
         where:{username: user.username,},
         raw: true
         });
     if ((!userDB) ) return false;
     if (!user.pathAvatar)  {
-        await db.Users.update(
+        await db.users.update(
         {
                     username: user.username,
                     email: user.email,
@@ -145,7 +145,7 @@ let updateUser =  async(user) => {
         return {status: true, data: userDB};
     } 
     else if (user.oldPassword === 'null' && user.newPassword === 'null'){
-         await db.Users.update(
+         await db.users.update(
         {
                     username: user.username,
                     email: user.email,
@@ -161,7 +161,7 @@ let updateUser =  async(user) => {
     )
         return {status: true, data: userDB};
     } else if (await bcrypt.compare(user.oldPassword, userDB.password)){
-    await db.Users.update(
+    await db.users.update(
         {
                     username: user.username,
                     password: hashUserPasswordFromBcrypt ,
@@ -199,7 +199,7 @@ let hashUserPassword= (password) => {
     })
 }
 const addFavoriteProduct = async (userId, productId) => {
-  const User = await db.Users.findOne({ where: { id: userId } });
+  const User = await db.users.findOne({ where: { id: userId } });
   if (!User) return { status: false, message: "Người dùng không tồn tại!" };
 
   
@@ -221,7 +221,7 @@ const addFavoriteProduct = async (userId, productId) => {
     } else favorites.push(productId);
 console.log("Check favorites after adding: ", favorites);
 
-  await db.Users.update(
+  await db.users.update(
     { favoriteProducts: favorites, 
         updated_at: new Date() },
     { where: { id: userId } }
@@ -233,7 +233,7 @@ console.log("Check favorites after adding: ", favorites);
 // View sản phẩm ưa thích
 // Lấy danh sách sản phẩm ưa thích của người dùng
 const viewFavoriteProduct = async (userId) => {
-    const User = await db.Users.findOne({ where: { id: userId } });   
+    const User = await db.users.findOne({ where: { id: userId } });   
     if (!User) return { status: false, message: "Người dùng không tồn tại!" };
      
     console.log("Check User favoriteProducts: ", User.favoriteProducts);
@@ -263,7 +263,7 @@ const viewFavoriteProduct = async (userId) => {
 // Xóa sản phẩm khỏi danh sách yêu thích
 const deFavoriteProduct = async (userId, productId) => {    
 
-    const User = await db.Users.findOne({ where: { id: userId } }); 
+    const User = await db.users.findOne({ where: { id: userId } }); 
     if (!User) return { status: false, message: "Người dùng không tồn tại!" };
     let favorites = User.favoriteProducts;
     if (!favorites) favorites = [];
@@ -283,7 +283,7 @@ const deFavoriteProduct = async (userId, productId) => {
     }
     favorites.splice(index, 1);
     console.log("Check favorites after removing: ", favorites);
-    await db.Users.update(
+    await db.users.update(
         { favoriteProducts: favorites, 
             updated_at: new Date() },
         { where: { id: userId } }
@@ -292,7 +292,7 @@ const deFavoriteProduct = async (userId, productId) => {
 };
 
 const addCartProduct = async (userId, productId) => {
-  const User = await db.Users.findOne({ where: { id: userId } });
+  const User = await db.users.findOne({ where: { id: userId } });
   if (!User) return { status: false, message: "Người dùng không tồn tại!" };
 
   
@@ -314,7 +314,7 @@ const addCartProduct = async (userId, productId) => {
     } else cart.push(productId);
 console.log("Check cart after adding: ", cart);
 
-  await db.Users.update(
+  await db.users.update(
     { cartProducts: cart, 
         updated_at: new Date() },
     { where: { id: userId } }
@@ -324,7 +324,7 @@ console.log("Check cart after adding: ", cart);
 };
 
 const viewCartProduct = async (userId) => {
-    const User = await db.Users.findOne({ where: { id: userId } });   
+    const User = await db.users.findOne({ where: { id: userId } });   
     if (!User) return { status: false, message: "Người dùng không tồn tại!" };
      
     console.log("Check User cartProducts: ", User.cartProducts);
@@ -354,7 +354,7 @@ const viewCartProduct = async (userId) => {
 // Xóa sản phẩm khỏi giỏ hàng
 const deCartProduct = async (userId, productId) => {
 
-    const User = await db.Users.findOne({ where: { id: userId } }); 
+    const User = await db.users.findOne({ where: { id: userId } }); 
     if (!User) return { status: false, message: "Người dùng không tồn tại!" };
     let Cart = User.cartProducts;
     if (!Cart) Cart = [];
@@ -374,7 +374,7 @@ const deCartProduct = async (userId, productId) => {
     }
     Cart.splice(index, 1);
     console.log("Check Cart after removing: ", Cart);
-    await db.Users.update(
+    await db.users.update(
         { cartProducts: Cart, 
             updated_at: new Date() },
         { where: { id: userId } }
@@ -505,16 +505,15 @@ let checkproduct = async(ProductId) => {
 }
 
 
-let displayOrder = async(user) => {
-    const orderDetails = []
-    // trường hợp không gửi cả thông tin ID của user
-    let userquery = await db.users.findOne({where: {username: user.username}, raw:true})
+let displayOrder = async(userId) => {
+    
+    let userquery = await db.users.findOne({where: {id: userId}, raw:true})
     console.log('>>>>>>>>>>>>>> check user query:   ',userquery)
     console.log('orders associations:', Object.keys(db.orders.associations));
 // phải thấy alias bạn đã đặt: ví dụ ['items','user','products'] hoặc ['orderitems',...]
 
     let order = await db.orders.findAll({
-  where: { user_id: userquery.id },
+  where: { user_id: userId },
   include: [
     //{ model: db.users, as: 'user' },
     {
@@ -523,7 +522,7 @@ let displayOrder = async(user) => {
       attributes: ['quantity', 'price'],
       include: [{ 
         model: db.products, as: 'product',
-        attributes: ['name'], 
+        attributes: ['id','name','images',], 
          
     }]
     }
@@ -531,43 +530,51 @@ let displayOrder = async(user) => {
   order: [['created_at', 'DESC']],
   raw: false,        // ép trả về instance
 
-});
-        // return new Promise(async (resolve,reject) =>{
-    //       try {
-    //         let order =await db.orders.findAll({raw:true,})
-    //         console.log('>>>>>>>>>>>>>> check data:   ',order)
-    //         resolve(order)
-    //     return  res.render(
-    //         'detailOrder.ejs',
-    //         {data:order}
-    //     )
-    // } catch (e) {
-    //     console.log(e)
-    // }
-    // })
-    
+});    
    console.log('>>>>>>>>>>>>>> check data:   ',order)
-    // for (let i = 0; i < order.length; i++) {
-    //     const orderby = order[i];
-    //     orderDetails.push({
-    //         user_id: orderby.user_id,
-    //         username: user.username,
-    //         order_id: orderby.id,
-    //         status: orderby.status,
-    //         total_price: orderby.total_price,
-    //         created_at: orderby.created_at,
-    //     });
-    // }
     return {
-        message:`Chi tiết các lần order của khách ${user.username}`, 
+        message:`Chi tiết các lần order của khách ${userquery.username}`, 
         data: order
     }
 
 }
 
+let displayOneOrder = async(userId, orderId) => {
+    let userquery = await db.users.findOne({where: {id: userId}, raw:true})
+    console.log('>>>>>>>>>>>>>> check user query:   ',userquery)
+    console.log('orders associations:', Object.keys(db.orders.associations));
+    // phải thấy alias bạn đã đặt: ví dụ ['items','user','products'] hoặc ['orderitems',...]
+
+    let order = await db.orderitems.findAll({
+    where: { order_id: orderId },
+    attributes: ['order_id','quantity', 'price'],
+    include: [
+    { 
+        model: db.products, as: 'product',
+        attributes: ['id','name','images',], 
+         
+    }
+    ],
+    order: [['created_at', 'DESC']],
+    raw: false,        // ép trả về instance
+
+});    
+   console.log('>>>>>>>>>>>>>> check data:   ',order)
+   if (!order || order.length === 0) {
+    return {
+        data: null
+    }
+    } 
+   return {
+        message:`Chi tiết các lần order của khách ${userquery.username}`, 
+        data: order
+    }
+
+}
 
 export default {
     displayOrder,
+    displayOneOrder,
     getUser,
     allUsers,
     createUser,
