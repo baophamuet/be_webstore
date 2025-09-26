@@ -9,7 +9,21 @@ export default (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      orders.belongsTo(models.users, { foreignKey: 'user_id', as: 'user' });
+
+      orders.hasMany(models.orderitems, {
+        foreignKey: 'order_id',
+        as: 'items',
+        onDelete: 'CASCADE',
+        hooks: true
+      });
+
+      orders.belongsToMany(models.products, {
+        through: models.orderitems,
+        foreignKey: 'order_id',
+        otherKey: 'product_id',
+        as: 'products'
+      });
     }
   }
   orders.init({

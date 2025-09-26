@@ -2,7 +2,7 @@
 
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('orderItems', [
+    await queryInterface.bulkInsert('orderitems', [
       {
         order_id: 1,
         product_id: 1,
@@ -70,6 +70,6 @@ export default {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('orderItems', null, {});
+    await queryInterface.bulkDelete('orderitems', null, {});
   }
 };

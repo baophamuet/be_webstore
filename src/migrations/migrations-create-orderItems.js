@@ -1,7 +1,7 @@
 'use strict';
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('orderItems', {
+    await queryInterface.createTable('orderitems', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -29,10 +29,15 @@ export default {
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
+      updated_at: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+      }
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('orderItems');
+    await queryInterface.dropTable('orderitems');
   }
 };

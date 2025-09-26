@@ -508,13 +508,30 @@ let checkproduct = async(ProductId) => {
 let displayOrder = async(user) => {
     const orderDetails = []
     // trường hợp không gửi cả thông tin ID của user
-    let userquery = await db.Users.findOne({where: {username: user.username}, raw:true})
+    let userquery = await db.users.findOne({where: {username: user.username}, raw:true})
     console.log('>>>>>>>>>>>>>> check user query:   ',userquery)
+    console.log('orders associations:', Object.keys(db.orders.associations));
+// phải thấy alias bạn đã đặt: ví dụ ['items','user','products'] hoặc ['orderitems',...]
+
     let order = await db.orders.findAll({
-        where:{
-          user_id: userquery.id,  
-        } ,
-        raw:true,})
+  where: { user_id: userquery.id },
+  include: [
+    //{ model: db.users, as: 'user' },
+    {
+      model: db.orderitems,
+      as: 'items',
+      attributes: ['quantity', 'price'],
+      include: [{ 
+        model: db.products, as: 'product',
+        attributes: ['name'], 
+         
+    }]
+    }
+  ],
+  order: [['created_at', 'DESC']],
+  raw: false,        // ép trả về instance
+
+});
         // return new Promise(async (resolve,reject) =>{
     //       try {
     //         let order =await db.orders.findAll({raw:true,})
@@ -530,20 +547,20 @@ let displayOrder = async(user) => {
     // })
     
    console.log('>>>>>>>>>>>>>> check data:   ',order)
-    for (let i = 0; i < order.length; i++) {
-        const orderby = order[i];
-        orderDetails.push({
-            user_id: orderby.user_id,
-            username: user.username,
-            order_id: orderby.id,
-            status: orderby.status,
-            total_price: orderby.total_price,
-            created_at: orderby.created_at,
-        });
-    }
+    // for (let i = 0; i < order.length; i++) {
+    //     const orderby = order[i];
+    //     orderDetails.push({
+    //         user_id: orderby.user_id,
+    //         username: user.username,
+    //         order_id: orderby.id,
+    //         status: orderby.status,
+    //         total_price: orderby.total_price,
+    //         created_at: orderby.created_at,
+    //     });
+    // }
     return {
         message:`Chi tiết các lần order của khách ${user.username}`, 
-        data: orderDetails
+        data: order
     }
 
 }

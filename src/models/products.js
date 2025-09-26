@@ -9,7 +9,17 @@ export default (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      products.belongsTo(models.categories, { foreignKey: 'category_id', as: 'category' });
+
+      products.hasMany(models.orderitems, { foreignKey: 'product_id', as: 'order_items' });
+
+      // tiện truy vấn: orders <-> products qua orderitems
+      products.belongsToMany(models.orders, {
+        through: models.orderitems,
+        foreignKey: 'product_id',
+        otherKey: 'order_id',
+        as: 'orders'
+      });
     }
   }
   products.init({

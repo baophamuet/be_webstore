@@ -9,7 +9,10 @@ export default (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      categories.hasMany(models.categories, { foreignKey: 'parent_id', as: 'children' });
+      categories.belongsTo(models.categories, { foreignKey: 'parent_id', as: 'parent' });
+
+      categories.hasMany(models.products, { foreignKey: 'category_id', as: 'products' });
     }
   }
   categories.init({
