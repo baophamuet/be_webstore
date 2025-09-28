@@ -545,23 +545,32 @@ let displayOneOrder = async(userId, orderId) => {
     console.log('orders associations:', Object.keys(db.orders.associations));
     // phải thấy alias bạn đã đặt: ví dụ ['items','user','products'] hoặc ['orderitems',...]
 
-    let order = await db.orderitems.findAll({
-    where: { order_id: orderId },
-    attributes: ['order_id','quantity', 'price'],
-    include: [
-    { 
-        model: db.products, as: 'product',
-        attributes: ['id','name','images',], 
-         
+    let order = await db.orders.findOne({
+  where: { id: orderId },
+  attributes: ['id', 'phone', 'address', 'status', 'payment', 'created_at'],
+  include: [
+    {
+      model: db.orderitems,
+      as: 'items',
+      attributes: ['id', 'quantity', 'price', 'created_at'],
+      include: [
+        {
+          model: db.products,
+          as: 'product',
+          attributes: ['id', 'name', 'images']
+        }
+      ]
     }
-    ],
-    order: [['created_at', 'DESC']],
-    raw: false,        // ép trả về instance
-
-});    
+  ],
+  order: [['created_at', 'DESC']],
+  raw: false // để trả về instance kèm data lồng nhau
+});
+  
    console.log('>>>>>>>>>>>>>> check data:   ',order)
    if (!order || order.length === 0) {
+    console.log(`message: false\nKhông tìm thấy đơn hàng hoặc đơn hàng rỗng`);
     return {
+        message: false,
         data: null
     }
     } 
@@ -572,9 +581,44 @@ let displayOneOrder = async(userId, orderId) => {
 
 }
 
+let createOrder = async (userId, orderId,payload) => {
+
+
+  const order = await db.orders.create({
+        id: orderId,
+        user_id: userId,
+        total_price: payload.total_price,    
+        status: 'pending',
+        payment: false,
+        phone: payload.phone,
+        address: payload.address,
+        created_at: new Date(),
+        updated_at: new Date()
+    })
+
+    let arrItems = payload.items
+    console.log("Check arrItems to create order items: ", arrItems);
+    // Lặp qua mảng items và tạo bản ghi trong bảng orderitems
+    for (const item of arrItems) {
+        
+        
+   await db.orderitems.create({
+        order_id: orderId,
+        product_id: item.id,
+        quantity: item._qty,
+        price: item._lineTotal,
+        created_at: new Date(),
+        updated_at: new Date()
+    })
+    console.log("Check item to create order item: ", item);
+    }
+    return true
+}
+
 export default {
     displayOrder,
     displayOneOrder,
+    createOrder,
     getUser,
     allUsers,
     createUser,

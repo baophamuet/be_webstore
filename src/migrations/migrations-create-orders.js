@@ -24,6 +24,12 @@ export default {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
+      phone: {
+        type: Sequelize.STRING
+      },
+      address: {
+        type: Sequelize.STRING
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,

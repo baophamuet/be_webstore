@@ -186,6 +186,8 @@ const initWebRoutes = (app) => {
   // cấu hình lấy sản phẩm theo user_id truyền vào từ url
   router.get('/users/:id/orders', homeController.getOrder);
   router.get('/users/:user_id/orders/:id', homeController.getOrderDetail);
+  // cấu hình insert đơn hàng
+  router.post('/users/:user_id/orders/:id', authMiddleware, homeController.createOrder);
 
 
 // Route combine

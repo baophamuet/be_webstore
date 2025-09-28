@@ -283,6 +283,14 @@ let getOrderDetail = async (req,res) =>{
     return res.json({status})
 }
 
+let createOrder = async (req, res) => {
+    const userId = req.params.user_id;
+    const orderId = req.params.id; 
+    console.log("Check req.body create order >>>>:", req.body)
+    let status = await CRUDService.createOrder(userId,orderId, req.body); 
+    return res.json(status);
+    }
+
 export default {
     getHomePage,
     getUser,
@@ -298,6 +306,7 @@ export default {
     delProduct,
     getOrder,
     getOrderDetail,
+    createOrder,
     addFavoriteProduct,
     addCartProduct,
     viewFavoriteProduct,
