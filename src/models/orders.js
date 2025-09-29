@@ -31,6 +31,7 @@ export default (sequelize, DataTypes) => {
     total_price: DataTypes.STRING,
     status: DataTypes.STRING,
     payment: DataTypes.BOOLEAN,
+    paymentmethod: DataTypes.STRING,
     phone: DataTypes.STRING,
     address: DataTypes.STRING,
     created_at: DataTypes.DATE

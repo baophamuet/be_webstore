@@ -24,6 +24,9 @@ export default {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
+      paymentmethod: {
+          type: Sequelize.ENUM('COD', 'ONLINE')
+      },
       phone: {
         type: Sequelize.STRING
       },

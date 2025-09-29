@@ -581,39 +581,60 @@ let displayOneOrder = async(userId, orderId) => {
 
 }
 
-let createOrder = async (userId, orderId,payload) => {
+let createOrder = async (userId, payload) => {
+  try {
+    console.log("👉 Bắt đầu tạo order với payload:", payload);
 
+    const order = await db.orders.create({
 
-  const order = await db.orders.create({
-        id: orderId,
-        user_id: userId,
-        total_price: payload.total_price,    
-        status: 'pending',
-        payment: false,
-        phone: payload.phone,
-        address: payload.address,
-        created_at: new Date(),
-        updated_at: new Date()
-    })
+      user_id: userId,
+      total_price: payload.total_price,
+      status: "pending",
+      payment: false,
+      paymentmethod: payload.paymentmethod,
+      phone: payload.phone,
+      address: payload.address,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+    
+    console.log("✅ Order đã tạo:", order.toJSON());
+    // truy cập sau khi tạo đơn thành công
+    console.log("👉 Order ID:", order.id);
+    console.log("👉 Order plain:", order.get({ plain: true }));
 
-    let arrItems = payload.items
-    console.log("Check arrItems to create order items: ", arrItems);
+    let arrItems = payload.items;
+    console.log("👉 Danh sách items để tạo orderitems:", arrItems);
+
     // Lặp qua mảng items và tạo bản ghi trong bảng orderitems
     for (const item of arrItems) {
-        
-        
-   await db.orderitems.create({
-        order_id: orderId,
-        product_id: item.id,
-        quantity: item._qty,
-        price: item._lineTotal,
-        created_at: new Date(),
-        updated_at: new Date()
-    })
-    console.log("Check item to create order item: ", item);
+      try {
+        const orderItem = await db.orderitems.create({
+          order_id: order.id,
+          product_id: item.id,
+          quantity: item._qty,
+          price: item._lineTotal,
+          created_at: new Date(),
+          updated_at: new Date(),
+        });
+        console.log("✅ Order item đã tạo:", orderItem.toJSON());
+      } catch (err) {
+        console.error("❌ Lỗi khi tạo order item:", err.message);
+        console.error(err); // log full stack Sequelize/MySQL
+      }
     }
-    return true
-}
+
+    return {
+        status: true, 
+        data: order
+    };
+  } catch (err) {
+    console.error("❌ Lỗi khi tạo order:", err.message);
+    console.error(err); // log full stack Sequelize/MySQL
+    return false;
+  }
+};
+
 
 export default {
     displayOrder,

@@ -5,7 +5,7 @@ import { raw } from 'mysql2';
 import jwt from 'jsonwebtoken';
 
 const REACT_APP_API_URL=`http://localhost:8080`
-// const REACT_APP_API_URL=https://baophamuet.site/api
+// const REACT_APP_API_URL=`https://aiha.website/api`
 let getHomePage = async (req,res) =>{
     try {
 
@@ -285,9 +285,10 @@ let getOrderDetail = async (req,res) =>{
 
 let createOrder = async (req, res) => {
     const userId = req.params.user_id;
-    const orderId = req.params.id; 
+
     console.log("Check req.body create order >>>>:", req.body)
-    let status = await CRUDService.createOrder(userId,orderId, req.body); 
+    let status = await CRUDService.createOrder(userId, req.body); 
+    console.log(`check status sau tạo đơn:` ,status)
     return res.json(status);
     }
 
