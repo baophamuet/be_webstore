@@ -292,6 +292,21 @@ let createOrder = async (req, res) => {
     return res.json(status);
     }
 
+let allOrders = async (req, res) => {
+    if (req.user.role !=="admin") return res.json({status:false, message:"Bạn không có quyền quản trị!"})
+    let status = await CRUDService.allOrders(); 
+    console.log(`check status call xem tất cả đơn hàng:` ,status)
+    return res.json(status);
+    }
+
+let updateOrder = async (req, res) => {
+    if (req.user.role !=="admin") return res.json({status:false, message:"Bạn không có quyền quản trị!"})
+    const orderId = req.params.id;  
+    console.log("Check req.body update order >>>>:", req.body)
+    let status = await CRUDService.updateOrder(orderId, req.body); 
+    console.log(`check status sau cập nhật đơn:` ,status)
+    return res.json(status);
+}
 export default {
     getHomePage,
     getUser,
@@ -308,6 +323,8 @@ export default {
     getOrder,
     getOrderDetail,
     createOrder,
+    allOrders,
+    updateOrder,
     addFavoriteProduct,
     addCartProduct,
     viewFavoriteProduct,

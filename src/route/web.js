@@ -107,7 +107,7 @@ const initWebRoutes = (app) => {
     if (allowedOrigins.includes(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
     }
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     if (req.method === 'OPTIONS') {
@@ -187,7 +187,11 @@ const initWebRoutes = (app) => {
   router.get('/users/:id/orders', homeController.getOrder);
   router.get('/users/:user_id/orders/:id', homeController.getOrderDetail);
   // cấu hình insert đơn hàng
-  router.post('/users/:user_id/orders/', authMiddleware, homeController.createOrder);
+  router.post('/users/:user_id/orders', authMiddleware, homeController.createOrder);
+  // cấu hình xem tat cả đơn hàng
+  router.get('/orders', authMiddleware, homeController.allOrders);
+  // cập nhật đơn hàng chỉ cho role admin
+  router.patch('/orders/:id', authMiddleware, homeController.updateOrder);
 
 
 // Route combine

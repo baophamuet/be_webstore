@@ -634,12 +634,63 @@ let createOrder = async (userId, payload) => {
     return false;
   }
 };
+let allOrders = async() => {
+    
+    let order = await db.orders.findAll({
+    include: [
+    {
+      model: db.orderitems,
+      as: 'items',
+      attributes: ['quantity', 'price'],
+      include: [{ 
+        model: db.products, as: 'product',
+        attributes: ['id','name','images',], 
+         
+    }]
+    }
+  ],
+  order: [['created_at', 'DESC']],
+  raw: false,        // ép trả về instance
+
+});    
+   console.log('>>>>>>>>>>>>>> check data:   ',order)
+    return {
+        message:`Lấy tất cả đơn hàng`, 
+        data: order
+    }
+
+}
+let updateOrder = async (orderId,data) => {
+    const checkOrder = await db.orders.findByPk(orderId);
+    const allowed = ['status', 'payment', 'paymentmethod'];
+    if (!checkOrder) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+  try {
+    console.log("Check orderId:", orderId);
+    console.log("Check data thay đổi:", data);
+    const updates = Object.fromEntries(
+    Object.entries(data).filter(([k, v]) => allowed.includes(k) && v !== undefined)
+    );
+
+    const status = await db.orders.update(data,
+    { where: { id: orderId } }
+    );
+    
+    console.log("✅ Order đã cập nhật:", status);
+    return true;
+  } catch (err) {
+    console.error("❌ Lỗi khi tạo order:", err.message);
+    console.error(err); // log full stack Sequelize/MySQL
+    return false;
+  }
+};
 
 
 export default {
     displayOrder,
     displayOneOrder,
     createOrder,
+    allOrders,
+    updateOrder,
     getUser,
     allUsers,
     createUser,
