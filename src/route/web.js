@@ -11,7 +11,11 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import 'dotenv/config'; // <-- Đảm bảo dòng này ở trên cùng để load biến môi trường
 import fs from "fs"; 
 import jwt from "jsonwebtoken";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 
+// import các thành phần từ vnpay (CommonJS)
+const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require("vnpay");
 
 // Tạo __dirname thủ công vì đang dùng ES Module
 const __filename = fileURLToPath(import.meta.url);
@@ -327,6 +331,51 @@ router.post("/combine-image", upload.single("modelFile"), async (req, res) => {
   // Ép tải xuống
   res.download(filePath, filename); // tự set Content-Disposition: attachment
 })
+//Route thanh toán sandbox vnpay
+  router.post("/create-payment", async (req, res) => {
+  
+  console.log("chgeck req.body-payload:  ",req.body);
+  const payload = req.body;
+  try {
+    const vnpay = new VNPay({
+      tmnCode: "E25KI2FG",
+      secureSecret: "OGI7Z313QYKAU2YVQQ7G771EBAKAT6EH",
+      vnpayHost: "https://sandbox.vnpayment.vn",
+      testMode: true,
+      HashAlgorithm: "SHA512",
+      loggerFn: ignoreLogger,
+    });
+
+    const tomorrow = new Date();
+    tomorrow.setMinutes(tomorrow.getMinutes() + 5);
+
+
+    // Giả lập đơn hàng
+    const findCart = { _id: "ORDER123453" };
+
+    const vnpayResponse = await vnpay.buildPaymentUrl({
+      vnp_Amount: payload.total_price,
+      vnp_IpAddr: "127.0.0.1",
+      vnp_TxnRef: payload.order_id || `${Date.now()}`, // Mã đơn hàng
+      vnp_OrderInfo: `${payload.order_id}`, // Mô tả đơn hàng
+      vnp_OrderType: ProductCode.Other,
+      vnp_ReturnUrl: "http://localhost:8080/check-payment-vnpay",
+      vnp_Locale: VnpLocale.VN,
+      vnp_CreateDate: dateFormat(new Date()),
+      vnp_ExpireDate: dateFormat(tomorrow),
+    });
+
+    return res.status(201).json(vnpayResponse);
+  } catch (error) {
+    console.error("❌ Lỗi tạo URL thanh toán:", error);
+    return res.status(500).json({ message: "Lỗi tạo QR thanh toán" });
+  }
+});
+
+  //check thanh toán đơn hàng
+  router.get(`/check-payment-vnpay`, (req,res)=>{
+    console.log(req.query);
+  })
   return app.use("/", router);
 };
 
